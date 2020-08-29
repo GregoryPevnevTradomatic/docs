@@ -1,6 +1,4 @@
-const USERS_TABLE = 'users';
-const DOCS_TABLE = 'docs';
-const LOGS_TABLE = 'logs';
+const { USERS_TABLE, DOCS_TABLE, LOGS_TABLE } = require('./utils/constants'); // eslint-disable-line
 
 exports.up = function(knex) {
   const usersTable = knex.schema.createTable(USERS_TABLE, builder => {
@@ -17,9 +15,8 @@ exports.up = function(knex) {
       .references('user_id')
       .inTable(USERS_TABLE)
       .onDelete('SET NULL')
-      .onUpdate('SET NULL')
       .index('DOCS_USERS_FK');
-    builder.enum('status', ['in-progess', 'aborted', 'completed'])
+    builder.enum('status', ['in-progress', 'aborted', 'completed'])
       .notNullable()
       .defaultTo('in-progress');
     builder.string('template_file', 250).nullable();
@@ -35,7 +32,6 @@ exports.up = function(knex) {
       .references('user_id')
       .inTable(USERS_TABLE)
       .onDelete('SET NULL')
-      .onUpdate('SET NULL')
       .index('LOGS_USERS_FK');
     builder.jsonb('log_message').notNullable();
     builder.timestamps(true, true);
