@@ -1,10 +1,11 @@
 import { Document } from '../models';
 import { Services } from '../services';
+import { FileData } from '../internals';
 
 export interface DocumentData {
   userId: string;
   templateFilename: string;
-  templateData: Buffer;
+  templateData: FileData;
 }
 
 export interface DocumentApi {
@@ -12,7 +13,7 @@ export interface DocumentApi {
   loadCurrentDocument(userId: string): Promise<Document>;
   initializeDocument(docData: DocumentData): Promise<Document>;
   abortDocument(document: Document): Promise<void>;
-  processDocument(document: Document, values: string[]): Promise<Buffer>;
+  processDocument(document: Document, values: string[]): Promise<FileData>;
 }
 
 // Note: Split into separate files if the functions grow too large
@@ -38,7 +39,7 @@ const AbortDocument = (services: Services) =>
   };
 
 const ProcessDocument = (services: Services) =>
-  (document: Document, values: string[]): Promise<Buffer> => {
+  (document: Document, values: string[]): Promise<FileData> => {
     return null;
   };
 
