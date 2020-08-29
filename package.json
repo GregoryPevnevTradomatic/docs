@@ -24,8 +24,10 @@
   "dependencies": {
     "@types/config": "0.0.36",
     "@types/knex": "^0.16.1",
+    "@types/uuid": "^8.3.0",
     "config": "^3.3.1",
     "knex": "^0.21.5",
-    "pg": "^8.3.3"
+    "pg": "^8.3.3",
+    "uuid": "^8.3.0"
   }
 }
