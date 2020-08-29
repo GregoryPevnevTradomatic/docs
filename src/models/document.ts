@@ -1,10 +1,20 @@
 import { DocumentParameters } from './common';
-import { DocumentFile } from './file';
+
+export enum DocumentFileType {
+  Template = 'template',
+  Result = 'result'
+}
 
 export enum DocumentStatus {
   InProgress = 'in-progress',
   Aborted = 'aborted',
   Completed = 'completed',
+}
+
+export interface DocumentFile {
+  fileId: string;
+  fileType: DocumentFileType;
+  fileName: string;
 }
 
 export interface Document {

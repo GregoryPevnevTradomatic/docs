@@ -32,6 +32,8 @@ exports.up = function(knex) {
   });
 
   const logsTable = knex.schema.createTable(LOGS_TABLE, builder => {
+    // SHOULD BE AS LIGHT AS POSSIBLE FOR PERFORMANT INSERTS
+    //   -> No Indexes and Foreign Keys
     builder.increments('log_id').primary('LOGS_PK');
     builder.string('user_id', 25).notNullable();
     builder.jsonb('log_message').notNullable();
