@@ -1,3 +1,6 @@
+import { DocumentParameters } from './common';
+import { DocumentFile } from './file';
+
 export enum DocumentStatus {
   InProgress = 'in-progress',
   Aborted = 'aborted',
@@ -8,8 +11,7 @@ export interface Document {
   docId: number;
   userId: string;
   status: DocumentStatus;
-  parameters: string[];
-  values: string[];
-  template: string;
-  result: string;
+  parameters: DocumentParameters;
+  template: DocumentFile;
+  result: DocumentFile;
 }

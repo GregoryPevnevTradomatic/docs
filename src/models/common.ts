@@ -1,9 +1,9 @@
-export interface Parameters {
+export interface DocumentParameters {
   [name:string]: string;
 }
 
-export const toParameters = (names: string[], values: string[]): Parameters =>
-  names.reduce((result: Parameters, name: string, index: number) => ({
+export const toParameters = (names: string[], values: string[]): DocumentParameters =>
+  names.reduce((result: DocumentParameters, name: string, index: number) => ({
     ...result,
     [name]: values[index],
   }), {});
