@@ -18,9 +18,9 @@ $$
         (counter, user_id, 'in-progress'),
         (counter + 1, user_id, 'completed');
       INSERT INTO files(file_id, doc_id, file_name, file_type) VALUES
-        ( 'T' || CAST(counter AS TEXT), counter, 'FILE', 'template'),
+        ('T' || CAST(counter AS TEXT), counter, 'FILE', 'template'),
         ('R' || CAST(counter AS TEXT), counter, 'FILE', 'result'),
-        ( 'T' || CAST((counter + 1) AS TEXT), counter + 1, 'FILE', 'template'),
+        ('T' || CAST((counter + 1) AS TEXT), counter + 1, 'FILE', 'template'),
         ('R' || CAST((counter + 1) AS TEXT), counter + 1, 'FILE', 'result');
 
       counter := counter + 2;

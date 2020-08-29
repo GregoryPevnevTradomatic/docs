@@ -6,16 +6,14 @@ exports.up = function(knex) {
     builder.string('username', 50)
       .notNullable()
       .defaultTo('');
-    builder.timestamps(true, true);
+      builder.timestamp('created_at')
+        .notNullable()
+        .defaultTo(knex.fn.now());
   });
 
   const docsTable = knex.schema.createTable(DOCS_TABLE, builder => {
     builder.increments('doc_id').primary('DOCS_PK');
-    builder.string('user_id', 25)
-      .references('user_id')
-      .inTable(USERS_TABLE)
-      .onDelete('SET NULL')
-      .index('DOCS_USERS_FK');
+    builder.string('user_id', 25).notNullable();
     builder.enum('status', ['in-progress', 'aborted', 'completed'])
       .notNullable()
       .defaultTo('in-progress');
@@ -24,17 +22,22 @@ exports.up = function(knex) {
     builder.specificType('parameters', 'VARCHAR(250)[]').nullable();
     builder.specificType('values', 'VARCHAR(250)[]').nullable();
     builder.timestamps(true, true);
+
+    builder.foreign('user_id', 'DOCS_USERS_FK')
+      .references('user_id')
+      .inTable(USERS_TABLE)
+      .onDelete('RESTRICT');
+
+    builder.index(['user_id', 'status'], 'DOCS_SEARCH_INDEX');
   });
 
   const logsTable = knex.schema.createTable(LOGS_TABLE, builder => {
     builder.increments('log_id').primary('LOGS_PK');
-    builder.string('user_id', 25)
-      .references('user_id')
-      .inTable(USERS_TABLE)
-      .onDelete('SET NULL')
-      .index('LOGS_USERS_FK');
+    builder.string('user_id', 25).notNullable();
     builder.jsonb('log_message').notNullable();
-    builder.timestamps(true, true);
+    builder.timestamp('created_at')
+      .notNullable()
+      .defaultTo(knex.fn.now());
   });
 
   return Promise.all([usersTable, docsTable, logsTable]);
