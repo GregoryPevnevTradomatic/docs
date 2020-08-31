@@ -20,7 +20,7 @@ exports.up = function(knex) {
               ELSE '-'
             END
           ) AS log_message
-        FROM logs;
+        FROM ${LOGS_TABLE};
       `
     )
   );
