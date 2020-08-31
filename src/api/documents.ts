@@ -1,6 +1,6 @@
 import { Document } from '../models';
 import { Services } from '../services';
-import { FileData } from '../internals';
+import { FileData } from '../utilities';
 
 export interface DocumentData {
   userId: string;

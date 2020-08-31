@@ -1,7 +1,7 @@
 import TelegramDocumentBotApi from 'node-telegram-bot-api';
 import https from 'https';
 import { TelegramFile } from './common';
-import { streamToBuffer } from '../internals';
+import { streamToBuffer } from '../utilities';
 
 export interface TelegramClient {
   downloadFile(file: TelegramFile): Promise<Buffer>;

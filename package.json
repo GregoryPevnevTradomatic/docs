@@ -28,6 +28,7 @@
     "@types/uuid": "^8.3.0",
     "config": "^3.3.1",
     "knex": "^0.21.5",
+    "moment-timezone": "^0.5.31",
     "node-telegram-bot-api": "^0.50.0",
     "pg": "^8.3.3",
     "telegraf": "^3.38.0",

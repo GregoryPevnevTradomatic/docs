@@ -1,6 +1,7 @@
 import KnexClient from 'knex';
 import { User } from '../models';
 import { UserRepository, LoadUser, UpsertUser } from '../services';
+import { currentTimestamp } from '../utilities';
 
 interface UserData {
   user_id: string;
@@ -25,9 +26,9 @@ export const createSqlUserRepository = (knex: KnexClient): UserRepository => {
     knex.raw(`
       INSERT INTO users(user_id, username) VALUES (?, ?)
       ON CONFLICT (user_id)
-      DO UPDATE SET username = ?
+      DO UPDATE SET username = ?, updated_at = ?
       RETURNING *
-    `, [userId, username, username]).then(({ rows }) =>
+    `, [userId, username, username, currentTimestamp()]).then(({ rows }) =>
       rows.length > 0 ? formatUser(rows[0]) : null
     );
 
