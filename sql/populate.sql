@@ -6,9 +6,11 @@ $$
     counter INTEGER := 1;
     user_id TEXT;
   BEGIN
-    DELETE FROM users;
-    DELETE FROM docs;
     DELETE FROM files;
+    DELETE FROM docs;
+    DELETE FROM logs;
+    DELETE FROM users;
+    
 
     LOOP
       user_id := 'ID' || CAST(counter AS TEXT);
