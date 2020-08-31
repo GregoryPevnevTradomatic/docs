@@ -4,11 +4,11 @@ export interface LoadUser {
   (userId: string): Promise<User>;
 }
 
-export interface CreateUser {
+export interface UpsertUser {
   (userId: string, username: string): Promise<User>;
 }
 
 export interface UserRepository {
   loadUser: LoadUser;
-  createUser: CreateUser;
+  upsertUser: UpsertUser;
 }

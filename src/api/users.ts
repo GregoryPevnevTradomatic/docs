@@ -11,8 +11,8 @@ export interface UserApi {
 }
 
 const GetUser = (services: Services) =>
-  async (userData: UserData): Promise<User> => {
-    return null;
+  async ({ userId, username }: UserData): Promise<User> => {
+    return services.userRepository.upsertUser(userId, username);
   };
 
 export const createUserApi = (services: Services): UserApi => ({
