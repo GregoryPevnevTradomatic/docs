@@ -14,6 +14,7 @@ import {
 import { Api } from '../../../api';
 import { DocumentParameters, parametersFrom } from '../../../models';
 import { TelegramClient } from '../../client';
+import { clearKeyboard } from '../../common/messages';
 
 // Ask: Is this ACTUALLY helpful???
 const extractParametersFromText = (text: string) =>
@@ -42,7 +43,7 @@ export const createParameterInputHandler = (api: Api) =>
     const completeHandler = async (ctx: ContextWithSession, _: NextFunction) => {
       const input = ctx.session.input;
 
-      await ctx.reply('Wait...');
+      await ctx.reply('Wait...', clearKeyboard());
 
       const parameters: DocumentParameters = parametersFrom(
         input.parameters,

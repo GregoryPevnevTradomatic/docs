@@ -51,7 +51,7 @@ export const createTemplateUploadHandler = (api: Api) =>
 
       // NO PARAMETERS FOUND IN THE DOCUMENT
       if(parameters.length === 0) {
-        await ctx.reply('Wait...');
+        await ctx.reply('Wait...', clearKeyboard());
 
         const result = await api.documents.processDocument(document, {});
   
