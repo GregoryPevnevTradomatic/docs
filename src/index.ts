@@ -1,8 +1,25 @@
 // Building implementations and injecting dependencies
 import config from 'config';
+import { Api, createApi } from './api';
+import { createSQLRepositories, Repositories } from './database';
+import { Services } from './services';
 import { createTelegramBot, TelegramBot } from './telegram';
 
-const telegramBot: TelegramBot = createTelegramBot(config.get('telegramToken'))(null);
+const telegramToken: string = config.get('telegramToken');
+const postgresqlConnectionString: string = config.get('postgresqlConnectionString');
+
+const repositories: Repositories = createSQLRepositories(postgresqlConnectionString);
+
+const services: Services = {
+  ...repositories,
+  documentRepository: null,
+  documentService: null,
+  storageService: null,
+};
+
+const api: Api = createApi(services);
+
+const telegramBot: TelegramBot = createTelegramBot(telegramToken)(api);
 
 process.on('uncaughtException', (e) => {
   console.error(e);

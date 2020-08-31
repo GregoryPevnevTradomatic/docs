@@ -2,7 +2,7 @@ import { Services } from '../services';
 
 export interface LogData {
   userId: string;
-  data: unknown;
+  message: unknown;
 }
 
 export interface LogApi {
@@ -10,8 +10,8 @@ export interface LogApi {
 }
 
 const Log = (services: Services) =>
-  async (logData: LogData): Promise<void> => {
-    return;
+  async ({ userId, message }: LogData): Promise<void> => {
+    return services.logRepository.log(userId, message);
   };
 
 export const createLogApi = (services: Services): LogApi => ({

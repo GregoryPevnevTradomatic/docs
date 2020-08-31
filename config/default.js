@@ -12,7 +12,7 @@ const LOCAL_STORAGE = String(process.env.LOCAL_STORAGE || DEFAULT_LOCAL_STORAGE)
 if (!fs.existsSync(LOCAL_STORAGE)) fs.mkdirSync(LOCAL_STORAGE);
 
 module.exports = {
-  postgresql: String(process.env.POSTGRESQL || DEFAULT_POSTGRES),
+  postgresqlConnectionString: String(process.env.POSTGRESQL || DEFAULT_POSTGRES),
   telegramToken: String(process.env.TELEGRAM_TOKEN || DEFAULT_TELEGRAM_TOKEN),
   localStorageDirectory: LOCAL_STORAGE,
 };

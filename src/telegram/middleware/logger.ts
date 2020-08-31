@@ -4,7 +4,10 @@ import { Api } from '../../api';
 
 export const createLoggerMiddleware = (api: Api): Middleware<ContextWithSession> =>
   async (ctx: ContextWithSession, next: NextFunction) => {
-    console.log(ctx.session.user, ctx.message);
+    await api.logs.log({
+      userId: ctx.session.user.userId,
+      message: ctx.message,
+    })
 
     await next();
 

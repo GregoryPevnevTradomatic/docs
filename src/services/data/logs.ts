@@ -1,7 +1,7 @@
-export interface LogMessage {
+export interface SaveLog {
   (userId: string, data: unknown): Promise<void>;
 }
 
 export interface LogRepository {
-  log: LogMessage;
+  log: SaveLog;
 }
