@@ -12,7 +12,6 @@ const repositories: Repositories = createSQLRepositories(postgresqlConnectionStr
 
 const services: Services = {
   ...repositories,
-  documentRepository: null,
   documentService: null,
   storageService: null,
 };

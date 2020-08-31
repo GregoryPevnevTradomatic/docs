@@ -3,12 +3,14 @@ import { User } from '../models';
 import { UserRepository, LoadUser, UpsertUser } from '../services';
 import { currentTimestamp } from '../utilities';
 
-interface UserData {
+interface SqlUserData {
   user_id: string;
   username: string;
+  created_at: string;
+  updated_at: string;
 }
 
-const formatUser = ({ user_id, username }: UserData): User => ({
+const userFromData = ({ user_id, username }: SqlUserData): User => ({
   userId: user_id,
   username,
 });
@@ -19,7 +21,7 @@ export const createSqlUserRepository = (knex: KnexClient): UserRepository => {
       .where({ 'user_id': userId })
       .limit(1)
       .then(result => 
-        result.length > 0 ? formatUser(result[0]) : null
+        result.length > 0 ? userFromData(result[0]) : null
       );
 
   const upsertUser: UpsertUser = async (userId: string, username: string): Promise<User> =>
@@ -29,7 +31,7 @@ export const createSqlUserRepository = (knex: KnexClient): UserRepository => {
       DO UPDATE SET username = ?, updated_at = ?
       RETURNING *
     `, [userId, username, username, currentTimestamp()]).then(({ rows }) =>
-      rows.length > 0 ? formatUser(rows[0]) : null
+      rows.length > 0 ? userFromData(rows[0]) : null
     );
 
   return { loadUser, upsertUser };

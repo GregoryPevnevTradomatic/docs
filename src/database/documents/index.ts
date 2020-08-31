@@ -1,0 +1,1 @@
+export { createSqlDocumentRepository } from './repository';
