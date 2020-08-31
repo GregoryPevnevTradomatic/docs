@@ -1,5 +1,5 @@
 import { DocumentParameters } from '../models';
-import { FileData } from '../internals';
+import { FileData } from '../utilities';
 
 // Getting template and returning list of parameters
 export interface ParseTemplate {
@@ -12,7 +12,7 @@ export interface ProcessTemplate {
   (document: FileData, parameters: DocumentParameters): Promise<Buffer>
 }
 
-export interface DocumentService {
+export interface Templates {
   parseTemplate: ParseTemplate;
   processTemplate: ProcessTemplate;
 }

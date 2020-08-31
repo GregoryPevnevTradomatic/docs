@@ -1,4 +1,4 @@
-import TelegramDocumentBotApi from 'node-telegram-bot-api';
+import TelegramApiClient from 'node-telegram-bot-api';
 import https from 'https';
 import { TelegramFile } from './common';
 import { FileData } from '../utilities';
@@ -8,10 +8,8 @@ export interface TelegramClient {
   uploadFile(chatId: number, data: FileData): Promise<void>;
 }
 
-export const createTelegramClient = (telegramToken: string): TelegramClient => {
-  const telegramClient = new TelegramDocumentBotApi(telegramToken, { polling: false });
-
-  const downloadFileFromTelegram = async (file: TelegramFile): Promise<FileData> => {
+const DownloadFileFromTelegram = (telegramClient: TelegramApiClient) =>
+  async (file: TelegramFile): Promise<FileData> => {
     const url: string = await telegramClient.getFileLink(file.file_id);
 
     return new Promise(resolve => 
@@ -22,7 +20,8 @@ export const createTelegramClient = (telegramToken: string): TelegramClient => {
     );
   };
 
-  const uploadFileToTelegram = async (chatId: number, data: FileData): Promise<void> => {
+const UploadFileToTelegram = (telegramClient: TelegramApiClient) =>
+  async (chatId: number, data: FileData): Promise<void> => {
     if(data.type === 'stream')
       await telegramClient.sendDocument(
         chatId,
@@ -30,8 +29,11 @@ export const createTelegramClient = (telegramToken: string): TelegramClient => {
       );
   };
 
+export const createTelegramClient = (telegramToken: string): TelegramClient => {
+  const telegramClient = new TelegramApiClient(telegramToken, { polling: false });
+
   return {
-    downloadFile: downloadFileFromTelegram,
-    uploadFile: uploadFileToTelegram,
+    downloadFile: DownloadFileFromTelegram(telegramClient),
+    uploadFile: UploadFileToTelegram(telegramClient),
   }
 };

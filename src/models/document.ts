@@ -19,8 +19,17 @@ export interface Document {
   result: DocumentFile;
 }
 
+export const emptyParameters = (names: string[]): DocumentParameters =>
+  names.reduce((result: DocumentParameters, name: string) => ({
+    ...result,
+    [name]: null,
+  }), {});
+
 export const parametersFrom = (names: string[], values: string[]): DocumentParameters =>
   names.reduce((result: DocumentParameters, name: string, index: number) => ({
     ...result,
     [name]: values[index],
   }), {});
+
+export const parameterNames = ({ parameters }: Document): string[] =>
+  Object.keys(parameters).slice();

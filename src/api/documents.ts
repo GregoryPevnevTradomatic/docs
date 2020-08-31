@@ -3,6 +3,7 @@ import path from 'path';
 import { Document, DocumentFile, DocumentParameters, DocumentStatus, resultFile, templateFile } from '../models';
 import { Services } from '../services';
 import { FileData } from '../utilities';
+import { emptyParameters } from '../models/document';
 
 export interface DocumentData {
   userId: string;
@@ -32,8 +33,19 @@ const LoadCurrentDocument = (services: Services) =>
 
 const InitializeDocument = (services: Services) =>
   async ({ userId, templateFilename, templateData }: DocumentData): Promise<Document> => {
+    const saveStream = () => new Promise(res => {
+      if(templateData.type === 'stream') {
+        templateData.stream.pipe(
+          fs.createWriteStream(
+            path.resolve(__dirname, '..', '..', 'files', `${userId}-${templateFilename}`)
+          ).on('finish', () => res())
+        );
+      }
+    });
+
     try {
-      const parameters: DocumentParameters = {}; // TODO: Parse Document
+      // TODO: Parse Document
+      const parameters: DocumentParameters = emptyParameters(['P1', 'P2', 'P3']);
 
       const document: Document = await services.documentRepository.createDocument(
         userId,
@@ -42,13 +54,7 @@ const InitializeDocument = (services: Services) =>
       );
 
       // TODO: Save to storage
-      if(templateData.type === 'stream') {
-        templateData.stream.pipe(
-          fs.createWriteStream(
-            path.resolve(__dirname, '..', '..', 'files', `${userId}-${templateFilename}`)
-          )
-        );
-      }
+      await saveStream();
 
       const file: DocumentFile = templateFile(templateFilename);
 
@@ -83,6 +89,7 @@ const ProcessDocument = (services: Services) =>
     // TODO: Load Result (Get Signed URL / Load from the Disk)
     const result = resultFile('RESULT');
 
+    document.parameters = parameters;
     document.status = DocumentStatus.Completed;
     document.result = result;
 

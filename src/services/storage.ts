@@ -16,7 +16,7 @@ export interface RemoveFile {
   (file: DocumentFile): Promise<void>;
 }
 
-export interface StorageService {
+export interface Storage {
   saveFile: SaveFile;
   loadFile: LoadFile;
   removeFile: RemoveFile;

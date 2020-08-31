@@ -1,7 +1,7 @@
-import { Extra, Markup } from 'telegraf';
+import { Extra } from 'telegraf';
 import { ExtraEditMessage } from 'telegraf/typings/telegram-types';
-import { ParametersInput } from './types';
-import { ParameterInputModesText, AbortCommand } from './constants';
+import { ParametersInput } from './models';
+import { ParameterInputModesText, BackCommand } from './constants';
 
 export const inputChoicesButtons = (): ExtraEditMessage =>
   Extra.markup(markup =>
@@ -13,7 +13,8 @@ export const inputChoicesButtons = (): ExtraEditMessage =>
 
 export const abortButton = (): ExtraEditMessage =>
   Extra.markup(markup =>
-    markup.keyboard([AbortCommand]).resize()
+    markup.keyboard([BackCommand])
+      .resize().oneTime(true)
   );
 
 export const clearKeyboard = (): ExtraEditMessage =>

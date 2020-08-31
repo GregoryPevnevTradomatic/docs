@@ -18,20 +18,20 @@ import { currentTimestamp } from '../../utilities';
 const formatDocumentResult = (result: SqlDocumentData[]): Document =>
   result.length > 0 ? documentFromData(result[0]) : null;
 
-export const createSqlDocumentRepository = (knex: KnexClient): DocumentRepository => {
-  const loadDocument: LoadDocument = (docId) =>
-    knex.select('*').from('documents')
-      .where({ doc_id: docId })
-      .then(formatDocumentResult);
+const SqlLoadDocument = (knex: KnexClient): LoadDocument => (docId) =>
+  knex.select('*').from('documents')
+    .where({ doc_id: docId })
+    .then(formatDocumentResult);
 
-  const loadCurrentDocument: LoadCurrentDocument = async (userId) =>
-    knex.select('*').from('documents')
-      .where({
-        user_id: userId,
-        status: String(DocumentStatus.InProgress)
-      }).then(formatDocumentResult);
+const SqlLoadCurrentDocument = (knex: KnexClient): LoadCurrentDocument => (userId) =>
+  knex.select('*').from('documents')
+    .where({
+      user_id: userId,
+      status: String(DocumentStatus.InProgress)
+    }).then(formatDocumentResult);
 
-  const createDocument: CreateDocument = async (userId, initStatus, params) => {
+const SqlCreateDocument = (knex: KnexClient): CreateDocument =>
+  async (userId, initStatus, params) => {
     const status = String(initStatus);
     const { parameters, values } = parametersToSql(params);
 
@@ -55,7 +55,8 @@ export const createSqlDocumentRepository = (knex: KnexClient): DocumentRepositor
     };
   };
 
-  const updateDocument: UpdateDocument = async (document) => {
+const SqlUpdateDocument = (knex: KnexClient): UpdateDocument =>
+  async (document) => {
     const status = String(document.status);
     const { parameters, values } = parametersToSql(document.parameters);
 
@@ -67,7 +68,8 @@ export const createSqlDocumentRepository = (knex: KnexClient): DocumentRepositor
     }).where({ doc_id: document.docId });
   };
 
-  const addFile: AddFileToDocument = async (document, file) => {
+const SqlAddFile = (knex: KnexClient): AddFileToDocument =>
+  async (document, file) => {
     await knex('files').insert({
       file_id: file.fileId,
       doc_id: document.docId,
@@ -76,11 +78,11 @@ export const createSqlDocumentRepository = (knex: KnexClient): DocumentRepositor
     });
   };
 
-  return {
-    loadDocument,
-    loadCurrentDocument,
-    createDocument,
-    updateDocument,
-    addFile,
-  };
-};
+export const createSqlDocumentRepository = (knex: KnexClient): DocumentRepository =>
+  ({
+    loadDocument: SqlLoadDocument(knex),
+    loadCurrentDocument: SqlLoadCurrentDocument(knex),
+    createDocument: SqlCreateDocument(knex),
+    updateDocument: SqlUpdateDocument(knex),
+    addFile: SqlAddFile(knex),
+  });

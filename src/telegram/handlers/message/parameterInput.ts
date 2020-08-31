@@ -2,16 +2,17 @@ import { Middleware } from 'telegraf';
 import {
   ContextWithSession,
   NextFunction,
-  ParametersInput,
   ParameterInputMode,
   UserState,
+  BackCommand,
+  popParameter,
+  pushParameter,
+  isParametersInputComplete,
   currentOption,
   abortButton,
 } from '../../common';
 import { Api } from '../../../api';
 import { DocumentParameters, parametersFrom } from '../../../models';
-import { AbortCommand } from '../../common/constants';
-import { clearKeyboard } from '../../common/messages';
 import { TelegramClient } from '../../client';
 
 // Ask: Is this ACTUALLY helpful???
@@ -24,43 +25,60 @@ const extractParametersFromText = (text: string) =>
     .map((param: string) => param.trim())
     .filter((param: string) => param.length !== 0);
 
-const isParametersInputComplete = (input: ParametersInput) =>
-  input.parameters.length === input.values.length;
+export const createParameterInputHandler = (api: Api) => 
+  (telegramClient: TelegramClient): Middleware<ContextWithSession> => {
+    const incompleteHandler = async (ctx: ContextWithSession, _: NextFunction) => {
+      const input = ctx.session.input;
 
-export const createParameterInputHandler = (api: Api) => (telegramClient: TelegramClient): Middleware<ContextWithSession> => 
-  async (ctx: ContextWithSession, _: NextFunction) => {
-    const text = ctx.message.text;
-    const mode = ctx.session.input.mode;
-    const input = ctx.session.input;
-
-    if(mode === ParameterInputMode.AllAtOnce) {
-      input.values = extractParametersFromText(ctx.message.text);
-    } else {
-      if(text === AbortCommand) input.values = [];
-      else input.values.push(text);
-    }
-
-    if(!isParametersInputComplete(input)) {
-      if(mode === ParameterInputMode.AllAtOnce) {
+      if(input.mode === ParameterInputMode.AllAtOnce)
         return ctx.reply('Invalid number of parameters, try again');
+
+      if(input.values.length === 0)
+        return ctx.reply(currentOption(input));
+
+      return ctx.reply(currentOption(input), abortButton());
+    };
+
+    const completeHandler = async (ctx: ContextWithSession, _: NextFunction) => {
+      const input = ctx.session.input;
+
+      await ctx.reply('Wait...');
+
+      const parameters: DocumentParameters = parametersFrom(
+        input.parameters,
+        input.values,
+      );
+  
+      const result = await api.documents.processDocument(ctx.session.document, parameters);
+  
+      // TODO: Function for resetting
+      ctx.session.state = UserState.INITIAL;
+      ctx.session.document = null;
+      ctx.session.input = null;
+  
+      return telegramClient.uploadFile(ctx.message.chat.id, result);
+    };
+
+    const inputHandler = async (ctx: ContextWithSession, next: NextFunction) => {
+      const text = ctx.message.text;
+      const mode = ctx.session.input.mode;
+      const input = ctx.session.input;
+
+      if(mode === ParameterInputMode.AllAtOnce) {
+        input.values = extractParametersFromText(ctx.message.text);
       } else {
-        return ctx.reply(currentOption(input), abortButton());
+        input.values = (
+          text === BackCommand ?
+            popParameter(input.values) :
+            pushParameter(input.values, text)
+        );
       }
-    }
 
-    await ctx.reply('Wait...', clearKeyboard());
+      if(!isParametersInputComplete(input))
+        return incompleteHandler(ctx, next);
 
-    const parameters: DocumentParameters = parametersFrom(
-      input.parameters,
-      input.values,
-    );
+      return completeHandler(ctx, next);
+    };
 
-    const result = await api.documents.processDocument(ctx.session.document, parameters);
-
-    // TODO: Function for resetting
-    ctx.session.state = UserState.INITIAL;
-    ctx.session.document = null;
-    ctx.session.input = null;
-
-    return telegramClient.uploadFile(ctx.message.chat.id, result);
+    return inputHandler;
   };

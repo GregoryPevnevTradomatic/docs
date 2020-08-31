@@ -12,8 +12,8 @@ const repositories: Repositories = createSQLRepositories(postgresqlConnectionStr
 
 const services: Services = {
   ...repositories,
-  documentService: null,
-  storageService: null,
+  templates: null,
+  storage: null,
 };
 
 const api: Api = createApi(services);

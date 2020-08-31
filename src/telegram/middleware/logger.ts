@@ -1,5 +1,5 @@
 import { Middleware } from 'telegraf';
-import { ContextWithSession, NextFunction } from '../common/types';
+import { ContextWithSession, NextFunction } from '../common';
 import { Api } from '../../api';
 
 export const createLoggerMiddleware = (api: Api): Middleware<ContextWithSession> =>

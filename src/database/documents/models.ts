@@ -38,14 +38,14 @@ export const documentFromData = (data: SqlDocumentData): Document =>
     userId: data.user_id,
     status: DocumentStatus[data.status],
     parameters: parametersFromSql(data),
-    template: {
+    template: data.template_id !== null ? {
       fileId: data.template_id,
       fileName: data.template_filename,
       fileType: DocumentFileType.Template,
-    },
-    result: {
+    } : null,
+    result: data.result_id !== null ? {
       fileId: data.result_id,
       fileName: data.result_filename,
       fileType: DocumentFileType.Result,
-    },
+    } : null,
   });

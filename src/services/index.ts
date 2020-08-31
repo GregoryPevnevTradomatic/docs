@@ -1,15 +1,15 @@
 import { DocumentRepository, UserRepository, LogRepository } from './data';
-import { DocumentService } from './docs';
-import { StorageService } from './storage';
+import { Templates } from './templates';
+import { Storage } from './storage';
 
 export interface Services {
   documentRepository: DocumentRepository;
   userRepository: UserRepository;
   logRepository: LogRepository;
-  documentService: DocumentService;
-  storageService: StorageService;
+  templates: Templates;
+  storage: Storage;
 }
 
 export * from './data';
-export * from './docs';
+export * from './templates';
 export * from './storage';

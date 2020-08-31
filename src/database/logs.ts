@@ -1,13 +1,15 @@
 import KnexClient from 'knex';
 import { LogRepository, SaveLog } from '../services';
 
-export const createSqlLogRepository = (knex: KnexClient): LogRepository => {
-  const log: SaveLog = async (userId: string, data: unknown): Promise<void> => {
+const LogDataSql = (knex: KnexClient): SaveLog =>
+  async (userId, data) => {
     await knex('logs').insert({
-      user_id: userId,
-      log_message: data,
+      'user_id': userId,
+      'log_data': data,
     });
   };
 
-  return { log };
-};
+export const createSqlLogRepository = (knex: KnexClient): LogRepository =>
+  ({
+    log: LogDataSql(knex),
+  });

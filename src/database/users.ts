@@ -15,17 +15,16 @@ const userFromData = ({ user_id, username }: SqlUserData): User => ({
   username,
 });
 
-export const createSqlUserRepository = (knex: KnexClient): UserRepository => {
-  const loadUser: LoadUser = async (userId: string): Promise<User> =>
-    knex.select(['user_id', 'username']).from('users')
-      .where({ 'user_id': userId })
-      .limit(1)
-      .then(result => 
-        result.length > 0 ? userFromData(result[0]) : null
-      );
+const LoadUserSql = (knex: KnexClient): LoadUser => (userId) =>
+  knex.select(['user_id', 'username']).from('users')
+    .where({ 'user_id': userId })
+    .limit(1)
+    .then(result => 
+      result.length > 0 ? userFromData(result[0]) : null
+    );
 
-  const upsertUser: UpsertUser = async (userId: string, username: string): Promise<User> =>
-    knex.raw(`
+const UpsertUserSql = (knex: KnexClient): UpsertUser => (userId, username) =>
+  knex.raw(`
       INSERT INTO users(user_id, username) VALUES (?, ?)
       ON CONFLICT (user_id)
       DO UPDATE SET username = ?, updated_at = ?
@@ -34,5 +33,8 @@ export const createSqlUserRepository = (knex: KnexClient): UserRepository => {
       rows.length > 0 ? userFromData(rows[0]) : null
     );
 
-  return { loadUser, upsertUser };
-};
+export const createSqlUserRepository = (knex: KnexClient): UserRepository =>
+  ({
+    loadUser: LoadUserSql(knex),
+    upsertUser: UpsertUserSql(knex),
+  });

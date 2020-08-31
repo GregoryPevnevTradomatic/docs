@@ -14,7 +14,7 @@ export const createMessageHandler = (api: Api) =>
   (telegramClient: TelegramClient): MiddlewareFn<ContextWithSession> => {
     const uploadHandler = createTemplateUploadHandler(api)(telegramClient) as MiddlewareFn<ContextWithSession>;
     const choiceHandler = createParameterChoiceHandler(api) as MiddlewareFn<ContextWithSession>;
-    const inputHandler = createParameterInputHandler(api) as MiddlewareFn<ContextWithSession>;
+    const inputHandler = createParameterInputHandler(api)(telegramClient) as MiddlewareFn<ContextWithSession>;
 
     const handlers: MessageHandlers = {
       [UserState.INITIAL]: uploadHandler,

@@ -1,7 +1,4 @@
-export enum ParameterInputMode {
-  OneByOne = 'One',
-  AllAtOnce = 'All',
-}
+import { ParameterInputMode } from './models';
 
 export const SUPPORTED_MIME_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -18,4 +15,4 @@ export const ParameterInputModesText = {
   'All at once': ParameterInputMode.AllAtOnce,
 };
 
-export const AbortCommand = 'Abort';
+export const BackCommand = 'Back';
