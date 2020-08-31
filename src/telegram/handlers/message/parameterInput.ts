@@ -9,9 +9,10 @@ import {
   abortButton,
 } from '../../common';
 import { Api } from '../../../api';
-import { parametersFrom } from '../../../models';
+import { DocumentParameters, parametersFrom } from '../../../models';
 import { AbortCommand } from '../../common/constants';
 import { clearKeyboard } from '../../common/messages';
+import { TelegramClient } from '../../client';
 
 // Ask: Is this ACTUALLY helpful???
 const extractParametersFromText = (text: string) =>
@@ -26,7 +27,7 @@ const extractParametersFromText = (text: string) =>
 const isParametersInputComplete = (input: ParametersInput) =>
   input.parameters.length === input.values.length;
 
-export const createParameterInputHandler = (api: Api): Middleware<ContextWithSession> =>
+export const createParameterInputHandler = (api: Api) => (telegramClient: TelegramClient): Middleware<ContextWithSession> => 
   async (ctx: ContextWithSession, _: NextFunction) => {
     const text = ctx.message.text;
     const mode = ctx.session.input.mode;
@@ -47,20 +48,19 @@ export const createParameterInputHandler = (api: Api): Middleware<ContextWithSes
       }
     }
 
-    ctx.session.document.parameters = parametersFrom(
+    await ctx.reply('Wait...', clearKeyboard());
+
+    const parameters: DocumentParameters = parametersFrom(
       input.parameters,
       input.values,
     );
 
-    console.log('Parameters:', ctx.session.document.parameters);
+    const result = await api.documents.processDocument(ctx.session.document, parameters);
 
+    // TODO: Function for resetting
     ctx.session.state = UserState.INITIAL;
-    return ctx.reply('Wait...', clearKeyboard());
+    ctx.session.document = null;
+    ctx.session.input = null;
 
-    // Supports Buffers / Streams / Filepaths (LOCAL ONLY)
-    //  -> Use a different method when sending URL to a file
-    // await telegramClient.sendDocument(
-    //   ctx.message.chat.id,
-    //   path.resolve(__dirname, '..', '..', '..', '..', 'files', 'test.docx'),
-    // );
+    return telegramClient.uploadFile(ctx.message.chat.id, result);
   };

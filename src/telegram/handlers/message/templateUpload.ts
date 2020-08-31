@@ -1,10 +1,8 @@
-import { Middleware, Extra, Markup } from 'telegraf';
-import fs from 'fs';
+import { Middleware } from 'telegraf';
 import path from 'path';
 import { TelegramClient } from '../../client';
 import {
   TelegramFile,
-  UserState,
   ContextWithSession,
   NextFunction,
   SUPPORTED_MIME_TYPES,
@@ -12,6 +10,8 @@ import {
 } from '../../common';
 import { Api } from '../../../api';
 import { inputChoicesButtons, clearKeyboard } from '../../common/messages';
+import { Document } from '../../../models';
+import { FileData } from '../../../utilities';
 
 const isValidFile = (file: TelegramFile): boolean => {
   if(file.mime_type && SUPPORTED_MIME_TYPES.includes(file.mime_type)) return true;
@@ -25,6 +25,7 @@ export const createTemplateUploadHandler = (api: Api) =>
     const templateHandler = async (ctx: ContextWithSession, _: NextFunction) => {
       const photo: unknown = ctx.message?.photo;
       const file: TelegramFile = ctx.message?.document;
+      const currentDocument: Document = ctx.session.document;
 
       if (photo)
         return ctx.reply('Images and photoes are not supported');
@@ -32,23 +33,17 @@ export const createTemplateUploadHandler = (api: Api) =>
       if (file) {
         if(!isValidFile(file)) return ctx.reply('Invalid file (Only DOCX files are supported)');
 
-        const data: Buffer = await telegramClient.downloadFile(file);
+        if(currentDocument) {
+          await api.documents.abortDocument(currentDocument);
+        }
 
-        // TODO:  Starting a new template
-        // TODO:  Send error in case of processing going wrong
+        const data: FileData = await telegramClient.downloadFile(file);
 
-        fs.writeFileSync(path.resolve(__dirname, '..', '..', '..', '..', 'files', `${Date.now()}.docx`), data);
-
-        ctx.session.document = {
-          docId: 1,
-          userId: "2",
-          status: null,
-          parameters: { 'P1': null, 'P2': null, "P3": null },
-          template: null,
-          result: null,
-        }; 
-        ctx.session.input = null;
-        ctx.session.state = UserState.TEMPLATE_UPLOADED;
+        ctx.session.document = await api.documents.initializeDocument({
+          userId: ctx.session.user.userId,
+          templateFilename: file.file_name || `${Date.now()}.docx`,
+          templateData: data,
+        });
 
         return ctx.reply('Select Parameter-Entering Mode', inputChoicesButtons());
       }

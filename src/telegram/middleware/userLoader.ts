@@ -1,7 +1,6 @@
 import { Middleware } from 'telegraf';
 import { ContextWithSession, NextFunction, TelegramUser } from '../common';
 import { Api, UserData } from '../../api';
-import { User } from './../../models';
 import { UserState } from '../common/state';
 
 const usernameFor = ({ first_name, last_name }: TelegramUser): string => {
@@ -21,18 +20,21 @@ export const createUserLoaderMiddleware = (api: Api): Middleware<ContextWithSess
   async (ctx: ContextWithSession, next: NextFunction) => {
     if(!ctx.session.user) {
       const data: UserData = userDataFrom(ctx.message.from);
-      const user: User = await api.users.getUser(data);
+      const [user, document] = await Promise.all([
+        api.users.getUser(data),
+        api.documents.loadCurrentDocument(data.userId),
+      ]);
 
       ctx.session.user = user;
-
-      // TODO: Loading the current document
-      ctx.session.document = null;
-
-      // TODO: Inferring current state based on the current document
-      ctx.session.state = UserState.INITIAL;
-
-      // TODO: Populating input based on the document
+      ctx.session.document = document;
       ctx.session.input = null;
+
+      // Note: Could store exra session data -> Populate parameters
+      if (document !== null && document.template !== null) {
+        ctx.session.state = UserState.TEMPLATE_UPLOADED;
+      } else {
+        ctx.session.state = UserState.INITIAL;
+      }
     }
 
     await next();

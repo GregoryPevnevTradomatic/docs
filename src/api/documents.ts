@@ -1,4 +1,6 @@
-import { Document } from '../models';
+import fs from 'fs';
+import path from 'path';
+import { Document, DocumentFile, DocumentParameters, DocumentStatus, resultFile, templateFile } from '../models';
 import { Services } from '../services';
 import { FileData } from '../utilities';
 
@@ -13,34 +15,83 @@ export interface DocumentApi {
   loadCurrentDocument(userId: string): Promise<Document>;
   initializeDocument(docData: DocumentData): Promise<Document>;
   abortDocument(document: Document): Promise<void>;
-  processDocument(document: Document, values: string[]): Promise<FileData>;
+  processDocument(document: Document, parameters: DocumentParameters): Promise<FileData>;
 }
 
 // Note: Split into separate files if the functions grow too large
 
 const LoadDocument = (services: Services) =>
   (docId: number): Promise<Document> => {
-    return null;
+    return services.documentRepository.loadDocument(docId);
   };
 
 const LoadCurrentDocument = (services: Services) =>
   (userId: string): Promise<Document> => {
-    return null;
+    return services.documentRepository.loadCurrentDocument(userId);
   };
 
 const InitializeDocument = (services: Services) =>
-  (docData: DocumentData): Promise<Document> => {
-    return null;
+  async ({ userId, templateFilename, templateData }: DocumentData): Promise<Document> => {
+    try {
+      const parameters: DocumentParameters = {}; // TODO: Parse Document
+
+      const document: Document = await services.documentRepository.createDocument(
+        userId,
+        DocumentStatus.InProgress,
+        parameters,
+      );
+
+      // TODO: Save to storage
+      if(templateData.type === 'stream') {
+        templateData.stream.pipe(
+          fs.createWriteStream(
+            path.resolve(__dirname, '..', '..', 'files', `${userId}-${templateFilename}`)
+          )
+        );
+      }
+
+      const file: DocumentFile = templateFile(templateFilename);
+
+      await services.documentRepository.addFile(document, file);
+
+      document.template = file;
+      
+      return document;
+    } catch (e) {
+      // TODO:  Send error in case of processing going wrong
+      throw new Error(e);
+    }
   };
 
 const AbortDocument = (services: Services) =>
   (document: Document): Promise<void> => {
-    return null;
+    document.status = DocumentStatus.Aborted;
+
+    return services.documentRepository.updateDocument(document);
   };
 
 const ProcessDocument = (services: Services) =>
-  (document: Document, values: string[]): Promise<FileData> => {
-    return null;
+  async (document: Document, parameters: DocumentParameters): Promise<FileData> => {
+    const stream = fs.createReadStream(
+      path.resolve(__dirname, '..', '..', 'files', `${document.userId}-${document.template.fileName}`)
+    );
+    const input: FileData = { type: 'stream', stream };
+
+    // TODO: Processing
+    const output = input;
+
+    // TODO: Load Result (Get Signed URL / Load from the Disk)
+    const result = resultFile('RESULT');
+
+    document.status = DocumentStatus.Completed;
+    document.result = result;
+
+    await Promise.all([
+      services.documentRepository.addFile(document, result),
+      services.documentRepository.updateDocument(document),
+    ]);
+
+    return output;
   };
 
 export const createDocumentApi = (services: Services): DocumentApi => ({

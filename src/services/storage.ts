@@ -1,5 +1,5 @@
 import { DocumentFile } from '../models';
-import { FileData } from '../internals';
+import { FileData } from '../utilities';
 
 // Using a combination of File-Id and File-Type
 //  -> Using an appropriate Bucket / Directory

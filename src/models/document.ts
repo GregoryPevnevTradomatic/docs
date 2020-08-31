@@ -1,9 +1,4 @@
-import { DocumentParameters } from './common';
-
-export enum DocumentFileType {
-  Template = 'template',
-  Result = 'result'
-}
+import { DocumentFile } from './file';
 
 export enum DocumentStatus {
   InProgress = 'in-progress',
@@ -11,10 +6,8 @@ export enum DocumentStatus {
   Completed = 'completed',
 }
 
-export interface DocumentFile {
-  fileId: string;
-  fileType: DocumentFileType;
-  fileName: string;
+export interface DocumentParameters {
+  [name:string]: string;
 }
 
 export interface Document {
@@ -25,3 +18,9 @@ export interface Document {
   template: DocumentFile;
   result: DocumentFile;
 }
+
+export const parametersFrom = (names: string[], values: string[]): DocumentParameters =>
+  names.reduce((result: DocumentParameters, name: string, index: number) => ({
+    ...result,
+    [name]: values[index],
+  }), {});
