@@ -39,6 +39,15 @@ const saveStream = (filepath: string, stream: NodeJS.ReadableStream): Promise<vo
       .on('error', rej)
   });
 
+const initializeDirectory = (dirPath: string) => {
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath);
+};
+
+const initializeDirectories = (rootPath: string) =>
+  Object.values(DIRECTORIES).forEach((dirname: string) => {
+    initializeDirectory(path.join(rootPath, dirname));
+  });
+
 const SaveFileToDisk = ({ storagePath }: LocalStorageSettings): SaveFile =>
   async (file: DocumentFile, data: FileData): Promise<void> => {
     const filepath: string = pathForFile(storagePath, file);
@@ -75,6 +84,9 @@ export const createLocalStorage = (storagePath: string): Storage => {
     storagePath,
     readMode: FileDataType.Stream,
   };
+
+  initializeDirectory(storagePath);
+  initializeDirectories(storagePath);
 
   return {
     saveFile: SaveFileToDisk(settings),

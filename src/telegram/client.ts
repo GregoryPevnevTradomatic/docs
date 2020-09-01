@@ -5,7 +5,7 @@ import { extractData, FileData, fileDataFromStream } from '../utilities';
 
 export interface TelegramClient {
   downloadFile(file: TelegramFile): Promise<FileData>;
-  uploadFile(chatId: number, data: FileData): Promise<void>;
+  uploadFile(chatId: number, filename: string, data: FileData): Promise<void>;
 }
 
 const DownloadFileFromTelegram = (telegramClient: TelegramApiClient) =>
@@ -18,10 +18,12 @@ const DownloadFileFromTelegram = (telegramClient: TelegramApiClient) =>
   };
 
 const UploadFileToTelegram = (telegramClient: TelegramApiClient) =>
-  async (chatId: number, data: FileData): Promise<void> => {
+  async (chatId: number, filename: string, data: FileData): Promise<void> => {
     await telegramClient.sendDocument(
       chatId,
       extractData(data),
+      {},
+      { filename }
     );
   };
 

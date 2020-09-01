@@ -42,6 +42,7 @@ export const createParameterInputHandler = (api: Api) =>
 
     const completeHandler = async (ctx: ContextWithSession, _: NextFunction) => {
       const input = ctx.session.input;
+      const document = ctx.session.document;
 
       await ctx.reply('Wait...', clearKeyboard());
 
@@ -57,7 +58,7 @@ export const createParameterInputHandler = (api: Api) =>
       ctx.session.document = null;
       ctx.session.input = null;
   
-      return telegramClient.uploadFile(ctx.message.chat.id, result);
+      return telegramClient.uploadFile(ctx.message.chat.id, document.result.fileName, result);
     };
 
     const inputHandler = async (ctx: ContextWithSession, next: NextFunction) => {

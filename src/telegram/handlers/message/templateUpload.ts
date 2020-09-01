@@ -58,7 +58,7 @@ export const createTemplateUploadHandler = (api: Api) =>
         // TODO: Function for resetting
         ctx.session.state = UserState.INITIAL;
     
-        return telegramClient.uploadFile(ctx.message.chat.id, result);
+        return telegramClient.uploadFile(ctx.message.chat.id, document.result.fileName, result);
       }
 
       ctx.session.state = UserState.TEMPLATE_UPLOADED;
