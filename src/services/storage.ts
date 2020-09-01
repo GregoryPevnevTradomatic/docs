@@ -12,12 +12,7 @@ export interface LoadFile {
   (file: DocumentFile): Promise<FileData>;
 }
 
-export interface RemoveFile {
-  (file: DocumentFile): Promise<void>;
-}
-
 export interface Storage {
   saveFile: SaveFile;
   loadFile: LoadFile;
-  removeFile: RemoveFile;
 }

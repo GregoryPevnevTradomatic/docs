@@ -1,9 +1,17 @@
 import fs from 'fs';
 import path from 'path';
-import { Document, DocumentFile, DocumentParameters, DocumentStatus, resultFile, templateFile } from '../models';
+import {
+  Document,
+  DocumentFile,
+  DocumentParameters,
+  DocumentStatus,
+  resultFile,
+  templateFile,
+  emptyParameters,
+} from '../models';
 import { Services } from '../services';
-import { FileData } from '../utilities';
-import { emptyParameters } from '../models/document';
+import { FileData, FileDataType } from '../utilities';
+import {  } from '../models';
 
 export interface DocumentData {
   userId: string;
@@ -81,7 +89,7 @@ const ProcessDocument = (services: Services) =>
     const stream = fs.createReadStream(
       path.resolve(__dirname, '..', '..', 'files', `${document.userId}-${document.template.fileName}`)
     );
-    const input: FileData = { type: 'stream', stream };
+    const input: FileData = { type: FileDataType.Stream, stream };
 
     // TODO: Processing
     const output = input;

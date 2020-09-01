@@ -1,7 +1,7 @@
 import TelegramApiClient from 'node-telegram-bot-api';
 import https from 'https';
 import { TelegramFile } from './common';
-import { FileData } from '../utilities';
+import { extractData, FileData, fileDataFromStream } from '../utilities';
 
 export interface TelegramClient {
   downloadFile(file: TelegramFile): Promise<FileData>;
@@ -13,20 +13,16 @@ const DownloadFileFromTelegram = (telegramClient: TelegramApiClient) =>
     const url: string = await telegramClient.getFileLink(file.file_id);
 
     return new Promise(resolve => 
-      https.get(url, stream => resolve({
-        type: 'stream',
-        stream,
-      }))
+      https.get(url, stream => resolve(fileDataFromStream(stream)))
     );
   };
 
 const UploadFileToTelegram = (telegramClient: TelegramApiClient) =>
   async (chatId: number, data: FileData): Promise<void> => {
-    if(data.type === 'stream')
-      await telegramClient.sendDocument(
-        chatId,
-        data.stream,
-      );
+    await telegramClient.sendDocument(
+      chatId,
+      extractData(data),
+    );
   };
 
 export const createTelegramClient = (telegramToken: string): TelegramClient => {
