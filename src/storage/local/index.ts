@@ -70,7 +70,7 @@ const LoadFileFromDisk = ({ storagePath, readMode }: LocalStorageSettings): Load
     }
   };
 
-const createLocalStorage = (storagePath: string): Storage => {
+export const createLocalStorage = (storagePath: string): Storage => {
   const settings: LocalStorageSettings = {
     storagePath,
     readMode: FileDataType.Stream,

@@ -41,16 +41,6 @@ const LoadCurrentDocument = (services: Services) =>
 
 const InitializeDocument = (services: Services) =>
   async ({ userId, templateFilename, templateData }: DocumentData): Promise<Document> => {
-    const saveStream = () => new Promise(res => {
-      if(templateData.type === 'stream') {
-        templateData.stream.pipe(
-          fs.createWriteStream(
-            path.resolve(__dirname, '..', '..', 'files', `${userId}-${templateFilename}`)
-          ).on('finish', () => res())
-        );
-      }
-    });
-
     try {
       // TODO: Parse Document
       const parameters: DocumentParameters = emptyParameters(['P1', 'P2', 'P3']);
@@ -61,10 +51,9 @@ const InitializeDocument = (services: Services) =>
         parameters,
       );
 
-      // TODO: Save to storage
-      await saveStream();
-
       const file: DocumentFile = templateFile(templateFilename);
+
+      await services.storage.saveFile(file, templateData);
 
       await services.documentRepository.addFile(document, file);
 
@@ -86,15 +75,13 @@ const AbortDocument = (services: Services) =>
 
 const ProcessDocument = (services: Services) =>
   async (document: Document, parameters: DocumentParameters): Promise<FileData> => {
-    const stream = fs.createReadStream(
-      path.resolve(__dirname, '..', '..', 'files', `${document.userId}-${document.template.fileName}`)
-    );
-    const input: FileData = { type: FileDataType.Stream, stream };
+    const input: FileData = await services.storage.loadFile(document.template);
 
     // TODO: Processing
     const output = input;
 
     // TODO: Load Result (Get Signed URL / Load from the Disk)
+    // TODO: Store Result / Cache Result???
     const result = resultFile('RESULT');
 
     document.parameters = parameters;
