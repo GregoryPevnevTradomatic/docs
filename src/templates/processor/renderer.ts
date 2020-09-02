@@ -1,8 +1,8 @@
 import DocxTemplater from 'docxtemplater';
 import PizZip from 'pizzip';
-import { DocumentParameters } from '../models';
+import { DocumentParameters } from '../../models';
 
-export const renderDocument = async (data: Buffer, params: DocumentParameters): Promise<Buffer> => {
+export const RenderDocument = () => async (data: Buffer, params: DocumentParameters): Promise<Buffer> => {
   const zip = new PizZip(data);
 
   try {
@@ -22,7 +22,7 @@ export const renderDocument = async (data: Buffer, params: DocumentParameters): 
   }
 };
 
-export const renderText = async (text: string, params: DocumentParameters): Promise<string> =>
+export const RenderText = () => async (text: string, params: DocumentParameters): Promise<string> =>
   Object.keys(params).reduce(
     (result, param) => result.replace(new RegExp(`{${param}}`, 'g'), params[param]),
     text,

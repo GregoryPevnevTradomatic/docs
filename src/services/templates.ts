@@ -1,15 +1,14 @@
-import { DocumentParameters } from '../models';
-import { FileData } from '../utilities';
+import { DocumentFile, DocumentParameters } from '../models';
 
 // Getting template and returning list of parameters
 export interface ParseTemplate {
-  (document: FileData): Promise<string[]>
+  (document: DocumentFile): Promise<DocumentParameters>;
 }
 
 // Creating document from a template and parameters -> Convert to DOCX
 //    - Single function for the entire pipeline
 export interface ProcessTemplate {
-  (document: FileData, parameters: DocumentParameters): Promise<Buffer>
+  (document: DocumentFile, parameters: DocumentParameters): Promise<DocumentFile>
 }
 
 export interface Templates {

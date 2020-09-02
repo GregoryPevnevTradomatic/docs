@@ -6,7 +6,7 @@ type DataStream = NodeJS.ReadableStream;
 const TASK_FILE_NAME = 'file.docx';
 
 // TODO: REFACTOR + OPTIMIZE THE SHIT OUT OF IT + DI
-export const convertDocxToPdf = (cloudConvert: CloudConvert) =>
+export const ConvertDocxToPdf = (cloudConvert: CloudConvert) =>
   async (document: DataStream): Promise<DataStream> => {
     let job = await cloudConvert.jobs.create({
       tasks: {
