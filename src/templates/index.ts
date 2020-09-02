@@ -6,6 +6,7 @@ import { Templates, ParseTemplate, ProcessTemplate } from '../services';
 import { bufferToStream, FileData, fileDataFromStream, FileDataType, streamToBuffer } from '../utilities';
 import { DocumentTemplateConverter, createConverter } from './converter';
 import { DocumentTemplateProcessor, createTempateProcessor } from './processor';
+import { prepareFilename } from './utils';
 
 // TODO: Split into a separate file
 
@@ -63,7 +64,10 @@ const ProcessDocumentTemplate = ({ processor, converter }: DocumentTemplatesServ
     const resultConvertedFile = await bufferToStream(resultDocumentFile)
       .then(converter.convertDocxToPdf);
 
-    return resultFile(resultFilename, fileDataFromStream(resultConvertedFile));
+    return resultFile(
+      prepareFilename(resultFilename),
+      fileDataFromStream(resultConvertedFile),
+    );
   };
 
 export const createDocumentTemplatesService = (settings: DocumentTemplatesSettings): Templates => {

@@ -42,6 +42,10 @@ const InitializeDocument = (services: Services) =>
     try {
       const file: DocumentFile = templateFile(templateFilename, templateData);
 
+      // TODO: This is bad - Make a built-in feature (Using Storage Service in the background???)
+      // Save before processing (Re-Opening the Stream)
+      await services.storage.saveFile(file);
+
       const parameters: DocumentParameters = await services.templates.parseTemplate(file)
 
       const document: Document = await services.documentRepository.createDocument(
@@ -49,8 +53,6 @@ const InitializeDocument = (services: Services) =>
         DocumentStatus.InProgress,
         parameters,
       );
-
-      await services.storage.saveFile(file);
 
       await services.documentRepository.addFile(document, file);
 
@@ -74,15 +76,17 @@ const ProcessDocument = (services: Services) =>
   async (document: Document, parameters: DocumentParameters): Promise<DocumentFile> => {
     // TODO: Load Result (Get Signed URL / Load from the Disk)
     // TODO: Store Result / Cache Result???
+    // TODO: CHECKING IF THE FILE-DATA NEEDS TO BE LOADED (NO-PARAM-PIPELINE)
     await services.storage.loadFile(document.template);
+
+    document.parameters = parameters;
+    document.status = DocumentStatus.Completed;
 
     const result = await services.templates.processTemplate(
       document.template,
       document.parameters,
     );
 
-    document.parameters = parameters;
-    document.status = DocumentStatus.Completed;
     document.result = result;
 
     // TODO: NO STORAGE - Why caching / buffering (When switching to URLs / Buckets)

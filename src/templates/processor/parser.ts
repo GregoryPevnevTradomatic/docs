@@ -8,8 +8,15 @@ const VARIABLES_PATTERN = /\{[^\}]+\}/ig; // eslint-disable-line no-useless-esca
 const extractParameter = (variable: string): string =>
   variable.slice(1, variable.length - 1);
 
-const extractParameters = (text: string): string[] =>
-  text.match(VARIABLES_PATTERN).map(extractParameter)
+const extractParameters = (text: string): string[] => {
+  const matches = text.match(VARIABLES_PATTERN);
+
+  console.log(matches);
+
+  if(!matches) return [];
+
+  return matches.map(extractParameter);
+};
 
 export const ParseFile = () => async (data: Buffer): Promise<string[]> =>
   new Promise((res, rej) => {

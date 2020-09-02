@@ -3,9 +3,12 @@ import PizZip from 'pizzip';
 import { DocumentParameters } from '../../models';
 
 export const RenderFile = () => async (data: Buffer, params: DocumentParameters): Promise<Buffer> => {
-  const zip = new PizZip(data);
+  console.log('Buffer:', data);
+  console.log('Parameters:', params);
 
   try {
+    const zip = new PizZip(data);
+
     const doc = new DocxTemplater(zip);
 
     doc.setData(params);
@@ -18,7 +21,7 @@ export const RenderFile = () => async (data: Buffer, params: DocumentParameters)
   } catch(e) {
     console.log('Could not render document', e);
 
-    return null;
+    throw e;
   }
 };
 
