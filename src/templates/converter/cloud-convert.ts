@@ -41,7 +41,7 @@ export const ConvertDocxToPdf = (cloudConvert: CloudConvert) =>
     const file = exportTask.result.files[0];
     
     // TODO: Reusing the same thing from telegram -> "http" module in "utilities"
-    return new Promise((resolve) => {
-      https.get(file.url, response => resolve(response));
+    return new Promise((res) => {
+      https.get(file.url, response => res(response));
     });
   };

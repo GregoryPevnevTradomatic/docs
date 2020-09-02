@@ -2,7 +2,7 @@ import DocxTemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 import { DocumentParameters } from '../../models';
 
-export const RenderDocument = () => async (data: Buffer, params: DocumentParameters): Promise<Buffer> => {
+export const RenderFile = () => async (data: Buffer, params: DocumentParameters): Promise<Buffer> => {
   const zip = new PizZip(data);
 
   try {

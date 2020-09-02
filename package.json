@@ -26,6 +26,7 @@
     "@types/knex": "^0.16.1",
     "@types/node-telegram-bot-api": "^0.50.2",
     "@types/pizzip": "^3.0.1",
+    "@types/textract": "^2.4.0",
     "@types/uuid": "^8.3.0",
     "cloudconvert": "^2.1.4",
     "config": "^3.3.1",
@@ -36,6 +37,7 @@
     "pg": "^8.3.3",
     "pizzip": "^3.0.6",
     "telegraf": "^3.38.0",
+    "textract": "^2.5.0",
     "uuid": "^8.3.0"
   }
 }

@@ -40,18 +40,15 @@ const LoadCurrentDocument = (services: Services) =>
 const InitializeDocument = (services: Services) =>
   async ({ userId, templateFilename, templateData }: DocumentData): Promise<Document> => {
     try {
-      // TODO: Parse Document
-      const parameters: DocumentParameters = emptyParameters([
-        'P1', 'P2', 'P3',
-      ]);
+      const file: DocumentFile = templateFile(templateFilename, templateData);
+
+      const parameters: DocumentParameters = await services.templates.parseTemplate(file)
 
       const document: Document = await services.documentRepository.createDocument(
         userId,
         DocumentStatus.InProgress,
         parameters,
       );
-
-      const file: DocumentFile = templateFile(templateFilename, templateData);
 
       await services.storage.saveFile(file);
 
@@ -75,14 +72,14 @@ const AbortDocument = (services: Services) =>
 
 const ProcessDocument = (services: Services) =>
   async (document: Document, parameters: DocumentParameters): Promise<DocumentFile> => {
-    await services.storage.loadFile(document.template);
-
-    // TODO: Processing
-    const output = document.template.fileData;
-
     // TODO: Load Result (Get Signed URL / Load from the Disk)
     // TODO: Store Result / Cache Result???
-    const result = resultFile('RESULT.docx', output);
+    await services.storage.loadFile(document.template);
+
+    const result = await services.templates.processTemplate(
+      document.template,
+      document.parameters,
+    );
 
     document.parameters = parameters;
     document.status = DocumentStatus.Completed;
@@ -90,6 +87,7 @@ const ProcessDocument = (services: Services) =>
 
     // TODO: NO STORAGE - Why caching / buffering (When switching to URLs / Buckets)
     // TODO:   -  Adding extra logic for skipping storage / saving via URLs???
+    // TODO:   -> Special Edge-Case for URLs / Non-Save marker
     await services.storage.saveFile(result);
 
     // TODO: Split into steps (More Reliability and Consistency / Better Error-Handling and Logging)

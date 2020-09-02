@@ -21,7 +21,6 @@ interface FileMetadata {
   contentType: string;
 }
 
-
 const metadataFor = (file: DocumentFile): FileMetadata =>
   ({
     filename: file.fileName,
