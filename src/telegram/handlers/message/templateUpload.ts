@@ -2,19 +2,18 @@ import { Middleware } from 'telegraf';
 import path from 'path';
 import { TelegramClient } from '../../client';
 import {
+  UserState,
   TelegramFile,
   ContextWithSession,
   NextFunction,
+  inputChoicesButtons,
+  clearKeyboard,
   SUPPORTED_MIME_TYPES,
   SUPPORTED_EXTENSIONS
 } from '../../common';
 import { Api } from '../../../api';
-import { inputChoicesButtons, clearKeyboard } from '../../common/messages';
-import { Document } from '../../../models';
+import { Document, DocumentFile, parameterNames } from '../../../models';
 import { FileData } from '../../../utilities';
-import { parameterNames } from '../../../models/document';
-import { isParametersInputComplete } from '../../common/models';
-import { UserState } from '../../common/state';
 
 const isValidFile = (file: TelegramFile): boolean => {
   if(file.mime_type && SUPPORTED_MIME_TYPES.includes(file.mime_type)) return true;
@@ -53,12 +52,12 @@ export const createTemplateUploadHandler = (api: Api) =>
       if(parameters.length === 0) {
         await ctx.reply('Wait...', clearKeyboard());
 
-        const result = await api.documents.processDocument(document, {});
+        const result: DocumentFile = await api.documents.processDocument(document, {});
   
         // TODO: Function for resetting
         ctx.session.state = UserState.INITIAL;
     
-        return telegramClient.uploadFile(ctx.message.chat.id, document.result.fileName, result);
+        return telegramClient.uploadFile(ctx.message.chat.id, result);
       }
 
       ctx.session.state = UserState.TEMPLATE_UPLOADED;

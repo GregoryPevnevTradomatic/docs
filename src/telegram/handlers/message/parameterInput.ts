@@ -51,14 +51,16 @@ export const createParameterInputHandler = (api: Api) =>
         input.values,
       );
   
-      const result = await api.documents.processDocument(ctx.session.document, parameters);
+      const result = await api.documents.processDocument(document, parameters);
   
       // TODO: Function for resetting
       ctx.session.state = UserState.INITIAL;
       ctx.session.document = null;
       ctx.session.input = null;
+
+      console.log('Result', result);
   
-      return telegramClient.uploadFile(ctx.message.chat.id, document.result.fileName, result);
+      return telegramClient.uploadFile(ctx.message.chat.id, result);
     };
 
     const inputHandler = async (ctx: ContextWithSession, next: NextFunction) => {

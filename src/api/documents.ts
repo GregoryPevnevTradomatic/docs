@@ -22,7 +22,7 @@ export interface DocumentApi {
   loadCurrentDocument(userId: string): Promise<Document>;
   initializeDocument(docData: DocumentData): Promise<Document>;
   abortDocument(document: Document): Promise<void>;
-  processDocument(document: Document, parameters: DocumentParameters): Promise<FileData>;
+  processDocument(document: Document, parameters: DocumentParameters): Promise<DocumentFile>;
 }
 
 // Note: Split into separate files if the functions grow too large
@@ -41,7 +41,9 @@ const InitializeDocument = (services: Services) =>
   async ({ userId, templateFilename, templateData }: DocumentData): Promise<Document> => {
     try {
       // TODO: Parse Document
-      const parameters: DocumentParameters = emptyParameters(['P1', 'P2', 'P3']);
+      const parameters: DocumentParameters = emptyParameters([
+        'P1', 'P2', 'P3',
+      ]);
 
       const document: Document = await services.documentRepository.createDocument(
         userId,
@@ -49,9 +51,9 @@ const InitializeDocument = (services: Services) =>
         parameters,
       );
 
-      const file: DocumentFile = templateFile(templateFilename);
+      const file: DocumentFile = templateFile(templateFilename, templateData);
 
-      await services.storage.saveFile(file, templateData);
+      await services.storage.saveFile(file);
 
       await services.documentRepository.addFile(document, file);
 
@@ -72,26 +74,31 @@ const AbortDocument = (services: Services) =>
   };
 
 const ProcessDocument = (services: Services) =>
-  async (document: Document, parameters: DocumentParameters): Promise<FileData> => {
-    const input: FileData = await services.storage.loadFile(document.template);
+  async (document: Document, parameters: DocumentParameters): Promise<DocumentFile> => {
+    await services.storage.loadFile(document.template);
 
     // TODO: Processing
-    const output = input;
+    const output = document.template.fileData;
 
     // TODO: Load Result (Get Signed URL / Load from the Disk)
     // TODO: Store Result / Cache Result???
-    const result = resultFile('RESULT');
+    const result = resultFile('RESULT.docx', output);
 
     document.parameters = parameters;
     document.status = DocumentStatus.Completed;
     document.result = result;
 
+    // TODO: NO STORAGE - Why caching / buffering (When switching to URLs / Buckets)
+    // TODO:   -  Adding extra logic for skipping storage / saving via URLs???
+    await services.storage.saveFile(result);
+
+    // TODO: Split into steps (More Reliability and Consistency / Better Error-Handling and Logging)
     await Promise.all([
       services.documentRepository.addFile(document, result),
       services.documentRepository.updateDocument(document),
     ]);
 
-    return output;
+    return result;
   };
 
 export const createDocumentApi = (services: Services): DocumentApi => ({

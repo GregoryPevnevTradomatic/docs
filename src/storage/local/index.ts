@@ -49,25 +49,33 @@ const initializeDirectories = (rootPath: string) =>
   });
 
 const SaveFileToDisk = ({ storagePath }: LocalStorageSettings): SaveFile =>
-  async (file: DocumentFile, data: FileData): Promise<void> => {
+  async (file: DocumentFile): Promise<void> => {
     const filepath: string = pathForFile(storagePath, file);
 
-    switch(data.type) {
+    if(file.fileData === null)
+      throw new Error('No data attached to the file');
+
+    switch(file.fileData.type) {
       case FileDataType.Buffer:
-        await saveBuffer(filepath, data.buffer);
+        await saveBuffer(filepath, file.fileData.buffer);
+
         break;
+      // TODO: Remove??? / Simplify / Optimize
       case FileDataType.Stream:
-        await saveStream(filepath, data.stream);
+        // Sinking / Dumping ENTIRE stream into Destinoation
+        await saveStream(filepath, file.fileData.stream);
+
+        // Opening new stream to produce data for the Upload / Further operations
+        file.fileData = fileDataFromStream(fs.createReadStream(filepath));
+
         break;
       default:
-        throw new Error(`Could not save file with teh following data: ${String(data.type)}`);
+        throw new Error(`Could not save file with the following data: ${String(file.fileData.type)}`);
     }
   };
 
-const LoadFileFromDisk = ({ storagePath, readMode }: LocalStorageSettings): LoadFile =>
-  async (file: DocumentFile): Promise<FileData> => {
-    const filepath: string = pathForFile(storagePath, file);
-
+const LoadFileFromDisk = ({ storagePath, readMode }: LocalStorageSettings): LoadFile => {
+  const loadDataForFile = async (filepath: string): Promise<FileData> => {
     switch(readMode) {
       case FileDataType.Filepath:
         return fileDataFromFilepath(filepath);
@@ -77,7 +85,22 @@ const LoadFileFromDisk = ({ storagePath, readMode }: LocalStorageSettings): Load
       default:
         return fileDataFromStream(fs.createReadStream(filepath));
     }
+  }
+
+  const loadData: LoadFile = async (file) => {
+    const filepath: string = pathForFile(storagePath, file);
+
+    try {
+      file.fileData = await loadDataForFile(filepath);
+    } catch (e) {
+      console.log(`Could not load file-data via path "${filepath}"`);
+
+      file.fileData = null;
+    }
   };
+
+  return loadData;
+};
 
 export const createLocalStorage = (storagePath: string): Storage => {
   const settings: LocalStorageSettings = {

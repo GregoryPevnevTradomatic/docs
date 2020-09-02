@@ -42,10 +42,12 @@ export const documentFromData = (data: SqlDocumentData): Document =>
       fileId: data.template_id,
       fileName: data.template_filename,
       fileType: DocumentFileType.Template,
+      fileData: null,
     } : null,
     result: data.result_id !== null ? {
       fileId: data.result_id,
       fileName: data.result_filename,
       fileType: DocumentFileType.Result,
+      fileData: null,
     } : null,
   });

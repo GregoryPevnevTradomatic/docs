@@ -2,10 +2,11 @@ import TelegramApiClient from 'node-telegram-bot-api';
 import https from 'https';
 import { TelegramFile } from './common';
 import { extractData, FileData, fileDataFromStream } from '../utilities';
+import { DocumentFile, DocumentFileType } from '../models';
 
 export interface TelegramClient {
   downloadFile(file: TelegramFile): Promise<FileData>;
-  uploadFile(chatId: number, filename: string, data: FileData): Promise<void>;
+  uploadFile(chatId: number, file: DocumentFile): Promise<void>;
 }
 
 const DownloadFileFromTelegram = (telegramClient: TelegramApiClient) =>
@@ -18,13 +19,15 @@ const DownloadFileFromTelegram = (telegramClient: TelegramApiClient) =>
   };
 
 const UploadFileToTelegram = (telegramClient: TelegramApiClient) =>
-  async (chatId: number, filename: string, data: FileData): Promise<void> => {
-    await telegramClient.sendDocument(
-      chatId,
-      extractData(data),
-      {},
-      { filename }
-    );
+  async (chatId: number, file: DocumentFile): Promise<void> => {
+    // TODO: Helper + Interface
+    const metadata = {
+      filename: file.fileName,
+      // TODO: Switch between Templates (PDF) and Results (DOCX)
+      contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    };
+
+    await telegramClient.sendDocument(chatId, extractData(file.fileData), {}, metadata);
   };
 
 export const createTelegramClient = (telegramToken: string): TelegramClient => {
