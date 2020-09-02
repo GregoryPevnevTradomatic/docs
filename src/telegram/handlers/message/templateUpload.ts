@@ -14,6 +14,7 @@ import {
 import { Api } from '../../../api';
 import { Document, DocumentFile, parameterNames } from '../../../models';
 import { FileData } from '../../../utilities';
+import { initialSessionFor } from '../../common/session';
 
 const isValidFile = (file: TelegramFile): boolean => {
   if(file.mime_type && SUPPORTED_MIME_TYPES.includes(file.mime_type)) return true;
@@ -46,7 +47,7 @@ export const createTemplateUploadHandler = (api: Api) =>
         templateFilename: file.file_name || `${Date.now()}.docx`,
         templateData: data,
       });
-      const parameters: string[] = parameterNames(document);
+      const parameters: string[] = parameterNames(document.parameters);
 
       // No parameters found
       if(parameters.length === 0) {
@@ -62,14 +63,18 @@ export const createTemplateUploadHandler = (api: Api) =>
 
         await progressControl.finish();
   
-        // TODO: Function for resetting
-        ctx.session.state = UserState.INITIAL;
+        ctx.session = initialSessionFor(ctx.session.user);
     
         return telegramClient.uploadFile(ctx.message.chat.id, result);
       }
 
       ctx.session.state = UserState.TEMPLATE_UPLOADED;
       ctx.session.document = document;
+      ctx.session.input = {
+        mode: null,
+        parameters,
+        values: [],
+      };
 
       return ctx.reply('Select Parameter-Entering Mode', inputChoicesButtons());
     };

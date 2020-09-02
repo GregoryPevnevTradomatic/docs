@@ -3,7 +3,6 @@ import {
   ContextWithSession,
   NextFunction,
   ParameterInputMode,
-  UserState,
   BackCommand,
   popParameter,
   pushParameter,
@@ -14,6 +13,7 @@ import {
 import { Api } from '../../../api';
 import { DocumentParameters, parametersFrom } from '../../../models';
 import { TelegramClient } from '../../client';
+import { initialSessionFor } from '../../common/session';
 
 // Ask: Is this ACTUALLY helpful???
 const extractParametersFromText = (text: string) =>
@@ -61,10 +61,7 @@ export const createParameterInputHandler = (api: Api) =>
 
       await progressControl.finish();
   
-      // TODO: Function for resetting
-      ctx.session.state = UserState.INITIAL;
-      ctx.session.document = null;
-      ctx.session.input = null;
+      ctx.session = initialSessionFor(ctx.session.user);
   
       return telegramClient.uploadFile(ctx.message.chat.id, result);
     };

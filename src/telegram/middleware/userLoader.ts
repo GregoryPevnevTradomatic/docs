@@ -2,6 +2,7 @@ import { Middleware } from 'telegraf';
 import { ContextWithSession, NextFunction, TelegramUser } from '../common';
 import { Api, UserData } from '../../api';
 import { UserState } from '../common/state';
+import { initialSessionFor } from '../common/session';
 
 const usernameFor = ({ first_name, last_name }: TelegramUser): string => {
   if(first_name && last_name) return `${first_name} ${last_name}`;
@@ -30,9 +31,9 @@ export const createUserLoaderMiddleware = (api: Api): Middleware<ContextWithSess
       console.log('User:', user);
       console.log('Current-Document:', document);
 
-      ctx.session.user = user;
+      ctx.session = initialSessionFor(ctx.session.user);
+
       ctx.session.document = document;
-      ctx.session.input = null;
 
       // Note: Could store exra session data -> Populate parameters
       if (document !== null && document.template !== null) {

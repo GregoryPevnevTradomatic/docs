@@ -15,13 +15,9 @@ export const createParameterChoiceHandler = (api: Api): Middleware<ContextWithSe
   async (ctx: ContextWithSession, _: NextFunction) => {
     const currentMode: ParameterInputMode = ParameterInputModesText[ctx.message.text];
 
+    ctx.session.input.mode = currentMode;
     ctx.session.state = UserState.ENTERING_PARAMETERS;
-    ctx.session.input = {
-      mode: currentMode,
-      // TODO: Move to Helper / Parameters / Model
-      parameters: Object.keys(ctx.session.document.parameters).sort(),
-      values: [],
-    };
+    
 
     switch(currentMode) {
       case ParameterInputMode.AllAtOnce:

@@ -1,3 +1,4 @@
 export * from './user';
-export * from './document';
+export * from './parameters';
 export * from './file';
+export * from './document';

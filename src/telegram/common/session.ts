@@ -13,3 +13,10 @@ export interface ContextSession {
 export interface ContextWithSession extends Context {
   session: ContextSession;
 }
+
+export const initialSessionFor = (user: User): ContextSession => ({
+  state: UserState.INITIAL,
+  document: null,
+  input: null,
+  user,
+});
