@@ -25,12 +25,16 @@
     "@types/config": "0.0.36",
     "@types/knex": "^0.16.1",
     "@types/node-telegram-bot-api": "^0.50.2",
+    "@types/pizzip": "^3.0.1",
     "@types/uuid": "^8.3.0",
+    "cloudconvert": "^2.1.4",
     "config": "^3.3.1",
+    "docxtemplater": "^3.19.0",
     "knex": "^0.21.5",
     "moment-timezone": "^0.5.31",
     "node-telegram-bot-api": "^0.50.0",
     "pg": "^8.3.3",
+    "pizzip": "^3.0.6",
     "telegraf": "^3.38.0",
     "uuid": "^8.3.0"
   }
