@@ -42,7 +42,5 @@ export const createUserLoaderMiddleware = (api: Api): Middleware<ContextWithSess
       }
     }
 
-    console.log('Session:', ctx.session);
-
     await next();
   };

@@ -15,8 +15,6 @@ export const createParameterChoiceHandler = (api: Api): Middleware<ContextWithSe
   async (ctx: ContextWithSession, _: NextFunction) => {
     const currentMode: ParameterInputMode = ParameterInputModesText[ctx.message.text];
 
-    console.log('Mode:', currentMode)
-
     ctx.session.state = UserState.ENTERING_PARAMETERS;
     ctx.session.input = {
       mode: currentMode,

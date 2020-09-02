@@ -11,8 +11,6 @@ const extractParameter = (variable: string): string =>
 const extractParameters = (text: string): string[] => {
   const matches = text.match(VARIABLES_PATTERN);
 
-  console.log(matches);
-
   if(!matches) return [];
 
   return matches.map(extractParameter);

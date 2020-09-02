@@ -14,7 +14,6 @@ import {
 import { Api } from '../../../api';
 import { DocumentParameters, parametersFrom } from '../../../models';
 import { TelegramClient } from '../../client';
-import { clearKeyboard } from '../../common/messages';
 
 // Ask: Is this ACTUALLY helpful???
 const extractParametersFromText = (text: string) =>
@@ -44,7 +43,14 @@ export const createParameterInputHandler = (api: Api) =>
       const input = ctx.session.input;
       const document = ctx.session.document;
 
-      await ctx.reply('Wait...', clearKeyboard());
+      const progressControl = await telegramClient.progress(
+        ctx.message.chat.id,
+        ['Loading file', 'Processing file', 'Converting to PDF', 'Sending it to you'],
+        // TODO: Determine base on file-size
+        5000, // Total of 12s (Average)
+      );
+
+      await progressControl.start();
 
       const parameters: DocumentParameters = parametersFrom(
         input.parameters,
@@ -52,13 +58,13 @@ export const createParameterInputHandler = (api: Api) =>
       );
   
       const result = await api.documents.processDocument(document, parameters);
+
+      await progressControl.finish();
   
       // TODO: Function for resetting
       ctx.session.state = UserState.INITIAL;
       ctx.session.document = null;
       ctx.session.input = null;
-
-      console.log('Result', result);
   
       return telegramClient.uploadFile(ctx.message.chat.id, result);
     };

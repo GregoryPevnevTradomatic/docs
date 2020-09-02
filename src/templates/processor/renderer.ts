@@ -3,9 +3,6 @@ import PizZip from 'pizzip';
 import { DocumentParameters } from '../../models';
 
 export const RenderFile = () => async (data: Buffer, params: DocumentParameters): Promise<Buffer> => {
-  console.log('Buffer:', data);
-  console.log('Parameters:', params);
-
   try {
     const zip = new PizZip(data);
 

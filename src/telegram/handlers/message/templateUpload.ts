@@ -48,11 +48,19 @@ export const createTemplateUploadHandler = (api: Api) =>
       });
       const parameters: string[] = parameterNames(document);
 
-      // NO PARAMETERS FOUND IN THE DOCUMENT
+      // No parameters found
       if(parameters.length === 0) {
-        await ctx.reply('Wait...', clearKeyboard());
+        const progressControl = await telegramClient.progress(
+          ctx.message.chat.id,
+          ['Loading file', 'Converting to PDF', 'Sending it to you'],
+          5000,
+        );
+
+        await progressControl.start();
 
         const result: DocumentFile = await api.documents.processDocument(document, {});
+
+        await progressControl.finish();
   
         // TODO: Function for resetting
         ctx.session.state = UserState.INITIAL;

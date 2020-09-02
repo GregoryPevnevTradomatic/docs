@@ -1,4 +1,4 @@
-import { Telegraf, Context, Middleware, session } from 'telegraf';
+import { Telegraf, Telegram, Context, Middleware, session } from 'telegraf';
 import { Api } from '../api';
 import { createTelegramClient } from './client'
 import { createUserLoaderMiddleware, createLoggerMiddleware } from './middleware';
