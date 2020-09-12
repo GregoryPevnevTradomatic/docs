@@ -50,7 +50,7 @@ export const createTemplateUploadHandler = (api: Api) =>
 
       const data: FileData = await telegramClient.downloadFile(file);
 
-      await progressControlDownload.start();
+      await progressControlDownload.finish();
 
       console.log('Telegram-File:', data);
 

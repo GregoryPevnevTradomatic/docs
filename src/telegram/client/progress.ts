@@ -42,7 +42,8 @@ const startProgress = (telegramClient: TelegramApiClient) => ({
     }
   };
 
-  sendMessage(0);
+  if(messages.length > 1)
+    sendMessage(1);
 
   return () => {
     clearTimeout(intervalTimeout)
@@ -60,13 +61,13 @@ export const Progress = (telegramClient: TelegramApiClient) =>
       async start() {
         startMessage = await telegramClient.sendMessage(
           chatId,
-          'Processing started',
+          'Please Wait...',
           clearKeyboard(),
         );
 
         progressMessage = await telegramClient.sendMessage(
           chatId,
-          'Wait...'
+          messages[0],
         );
 
         stopper = startProgress(telegramClient)({

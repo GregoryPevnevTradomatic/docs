@@ -2,10 +2,13 @@
 .git
 .gitignore
 
+migrations
 node_modules
+dist
 src
 files
 sql
 migrgations
 .env*
 nodemon.json
+.DS_Store
