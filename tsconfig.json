@@ -1,18 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es5",                          
+    "target": "es6",                          
     "module": "commonjs",                    
     "lib": ["es6"],                     
     "allowJs": true,
     "outDir": "dist",                          
-    "rootDir": ".",
+    "rootDir": "./src",
     "strict": true,    
     "strictNullChecks": false,     
     "noImplicitAny": false,
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": [
-    "src"
+  "exclude": [
+    "node_modules",
+    "config",
+    "migrations",
+    "dist",
+    "knexfile.js"
   ]
 }

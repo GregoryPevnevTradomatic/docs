@@ -40,7 +40,17 @@ export const createTemplateUploadHandler = (api: Api) =>
         await api.documents.abortDocument(currentDocument);
       }
 
+      const progressControlDownload = await telegramClient.progress(
+        ctx.message.chat.id,
+        ['Downloading...', 'Scanning the file...'],
+        1000,
+      );
+
+      await progressControlDownload.start();
+
       const data: FileData = await telegramClient.downloadFile(file);
+
+      await progressControlDownload.start();
 
       console.log('Telegram-File:', data);
 
@@ -60,19 +70,19 @@ export const createTemplateUploadHandler = (api: Api) =>
       if(parameters.length === 0) {
         console.log('No Parameters');
         
-        const progressControl = await telegramClient.progress(
+        const progressControlProcess = await telegramClient.progress(
           ctx.message.chat.id,
           ['Loading file', 'Converting to PDF', 'Sending it to you'],
           5000,
         );
 
-        await progressControl.start();
+        await progressControlProcess.start();
 
         const result: DocumentFile = await api.documents.processDocument(document, {});
 
         console.log('Result:', result);
 
-        await progressControl.finish();
+        await progressControlProcess.finish();
   
         ctx.session = initialSessionFor(ctx.session.user);
 

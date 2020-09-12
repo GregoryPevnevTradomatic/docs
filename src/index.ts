@@ -7,12 +7,14 @@ import { LocalStorage, CloudStorage, CloudStorageSettings } from './storage';
 import { createDocumentTemplatesService } from './templates';
 import { createTelegramBot, TelegramBot } from './telegram';
 import { LocalStorageSettings } from './storage/local/common';
+import { startHealthServer } from './utilities/server/health';
 
 const postgresqlConnectionString: string = config.get('postgresqlConnectionString');
 const telegramToken: string = config.get('telegramToken');
 const localStorageSettings: LocalStorageSettings = config.get('localStorage');
 const cloudStorageSettings: CloudStorageSettings = config.get('cloudStorage');
 const cloudConvertKey: string = config.get('cloudConvertKey');
+const healthServer: { port: number } = config.get('server');
 
 const localStorage = LocalStorage(localStorageSettings);
 const cloudStorage = CloudStorage(cloudStorageSettings);
@@ -40,7 +42,12 @@ process.on('unhandledRejection', (e) => {
   process.exit(1);
 });
 
-telegramBot.start()
-  .then(() => {
-    console.log('Telegram bot started');
-  });
+module.exports = () => {
+  telegramBot.start()
+    .then(() => {
+      console.log('Telegram bot started');
+    });
+
+  if(healthServer)
+    startHealthServer(healthServer.port)('Healthy');
+};
