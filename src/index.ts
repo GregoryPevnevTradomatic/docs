@@ -3,21 +3,27 @@ import config from 'config';
 import { Api, createApi } from './api';
 import { Services } from './services';
 import { createSQLRepositories, Repositories } from './database';
-import { createLocalStorage } from './storage';
+import { LocalStorage, CloudStorage, CloudStorageSettings } from './storage';
 import { createDocumentTemplatesService } from './templates';
 import { createTelegramBot, TelegramBot } from './telegram';
+import { LocalStorageSettings } from './storage/local/common';
 
-const telegramToken: string = config.get('telegramToken');
-const localStorageDirectory: string = config.get('localStorageDirectory');
 const postgresqlConnectionString: string = config.get('postgresqlConnectionString');
+const telegramToken: string = config.get('telegramToken');
+const localStorageSettings: LocalStorageSettings = config.get('localStorage');
+const cloudStorageSettings: CloudStorageSettings = config.get('cloudStorage');
 const cloudConvertKey: string = config.get('cloudConvertKey');
+
+const localStorage = LocalStorage(localStorageSettings);
+const cloudStorage = CloudStorage(cloudStorageSettings);
 
 const repositories: Repositories = createSQLRepositories(postgresqlConnectionString);
 
 const services: Services = {
   ...repositories,
   templates: createDocumentTemplatesService({ cloudConvertKey }),
-  storage: createLocalStorage(localStorageDirectory),
+  // storage: LocalStorage(localStorageDirectory),
+  storage: cloudStorage,
 };
 
 const api: Api = createApi(services);

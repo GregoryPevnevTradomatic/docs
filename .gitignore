@@ -1,5 +1,6 @@
 /node_modules
 /dist
 /files
+/credentials
 /package-lock.json
 .env

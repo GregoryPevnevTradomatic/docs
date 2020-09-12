@@ -1,7 +1,7 @@
-import { Telegraf, Telegram, Context, Middleware, session } from 'telegraf';
+import { Telegraf, Context, Middleware, session } from 'telegraf';
 import { Api } from '../api';
 import { createTelegramClient } from './client'
-import { createUserLoaderMiddleware, createLoggerMiddleware } from './middleware';
+import { createAuthMiddleware, createLoggerMiddleware } from './middleware';
 import {
   createStartHandler,
   createHelpHandler,
@@ -18,7 +18,7 @@ export const createTelegramBot = (botToken: string) => (api: Api): TelegramBot =
   const telegramClient = createTelegramClient(botToken);
 
   telegramBot.use(session()); // Using Local session / File / Store
-  telegramBot.use(createUserLoaderMiddleware(api) as Middleware<Context>);
+  telegramBot.use(createAuthMiddleware(api) as Middleware<Context>);
   telegramBot.use(createLoggerMiddleware(api) as Middleware<Context>);
 
   telegramBot.start(createStartHandler(api) as Middleware<Context>);

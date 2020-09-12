@@ -46,6 +46,8 @@ const InitializeDocument = (services: Services) =>
       // Save before processing (Re-Opening the Stream)
       await services.storage.saveFile(file);
 
+      console.log('File Saved');
+
       const parameters: DocumentParameters = await services.templates.parseTemplate(file)
 
       const document: Document = await services.documentRepository.createDocument(
@@ -74,9 +76,6 @@ const AbortDocument = (services: Services) =>
 
 const ProcessDocument = (services: Services) =>
   async (document: Document, parameters: DocumentParameters): Promise<DocumentFile> => {
-    // TODO: Load Result (Get Signed URL / Load from the Disk)
-    // TODO: Store Result / Cache Result???
-    // TODO: CHECKING IF THE FILE-DATA NEEDS TO BE LOADED (NO-PARAM-PIPELINE)
     await services.storage.loadFile(document.template);
 
     document.parameters = parameters;
@@ -89,16 +88,15 @@ const ProcessDocument = (services: Services) =>
 
     document.result = result;
 
-    // TODO: NO STORAGE - Why caching / buffering (When switching to URLs / Buckets)
-    // TODO:   -  Adding extra logic for skipping storage / saving via URLs???
-    // TODO:   -> Special Edge-Case for URLs / Non-Save marker
-    await services.storage.saveFile(result);
+    await services.storage.saveFile(document.result);
 
     // TODO: Split into steps (More Reliability and Consistency / Better Error-Handling and Logging)
     await Promise.all([
       services.documentRepository.addFile(document, result),
       services.documentRepository.updateDocument(document),
     ]);
+
+    await services.storage.loadFile(document.result);
 
     return result;
   };

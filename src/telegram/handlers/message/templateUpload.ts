@@ -42,15 +42,24 @@ export const createTemplateUploadHandler = (api: Api) =>
 
       const data: FileData = await telegramClient.downloadFile(file);
 
+      console.log('Telegram-File:', data);
+
       const document: Document = await api.documents.initializeDocument({
         userId: ctx.session.user.userId,
         templateFilename: file.file_name || `${Date.now()}.docx`,
         templateData: data,
       });
+
+      console.log('Document:', document);
+
       const parameters: string[] = parameterNames(document.parameters);
+
+      console.log('Parameters:', parameters);
 
       // No parameters found
       if(parameters.length === 0) {
+        console.log('No Parameters');
+        
         const progressControl = await telegramClient.progress(
           ctx.message.chat.id,
           ['Loading file', 'Converting to PDF', 'Sending it to you'],
@@ -61,9 +70,13 @@ export const createTemplateUploadHandler = (api: Api) =>
 
         const result: DocumentFile = await api.documents.processDocument(document, {});
 
+        console.log('Result:', result);
+
         await progressControl.finish();
   
         ctx.session = initialSessionFor(ctx.session.user);
+
+        console.log('Session:', ctx.session);
     
         return telegramClient.uploadFile(ctx.message.chat.id, result);
       }
@@ -75,6 +88,8 @@ export const createTemplateUploadHandler = (api: Api) =>
         parameters,
         values: [],
       };
+
+      console.log('Session:', ctx.session);
 
       return ctx.reply('Select Parameter-Entering Mode', inputChoicesButtons());
     };

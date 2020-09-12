@@ -17,10 +17,10 @@ const userDataFrom = (telegramUser: TelegramUser): UserData => ({
   username: usernameFor(telegramUser),
 });
 
-export const createUserLoaderMiddleware = (api: Api): Middleware<ContextWithSession> =>
+export const createAuthMiddleware = (api: Api): Middleware<ContextWithSession> =>
   async (ctx: ContextWithSession, next: NextFunction) => {
     if(!ctx.session.user) {
-      console.log('Loading User\'s Data')
+      console.log('Loading User')
 
       const data: UserData = userDataFrom(ctx.message.from);
       const [user, document] = await Promise.all([
@@ -31,7 +31,7 @@ export const createUserLoaderMiddleware = (api: Api): Middleware<ContextWithSess
       console.log('User:', user);
       console.log('Current-Document:', document);
 
-      ctx.session = initialSessionFor(ctx.session.user);
+      ctx.session = initialSessionFor(user);
 
       ctx.session.document = document;
 
@@ -43,5 +43,5 @@ export const createUserLoaderMiddleware = (api: Api): Middleware<ContextWithSess
       }
     }
 
-    await next();
+    next();
   };

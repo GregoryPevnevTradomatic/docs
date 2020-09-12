@@ -11,7 +11,12 @@ export interface LoadFile {
   (file: DocumentFile): Promise<void>;
 }
 
+export interface ShareURL {
+  (file: DocumentFile): Promise<void>;
+}
+
 export interface Storage {
   saveFile: SaveFile;
   loadFile: LoadFile;
+  shareURL: ShareURL;
 }

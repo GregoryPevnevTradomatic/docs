@@ -11,8 +11,24 @@ const DEFAULT_CLOUD_CONVERT_KEY = 'TEST-KEY';
 const CLOUD_CONVERT_KEY = String(process.env.CLOUD_CONVERT_KEY || DEFAULT_CLOUD_CONVERT_KEY);
 
 module.exports = {
+  // Database
   postgresqlConnectionString: String(process.env.POSTGRESQL || DEFAULT_POSTGRES),
+
+  // Telegram
   telegramToken: String(process.env.TELEGRAM_TOKEN || DEFAULT_TELEGRAM_TOKEN),
-  localStorageDirectory: LOCAL_STORAGE,
+
+  // Storage
+  // Local Storage
+  localStorage: {
+    storagePath: LOCAL_STORAGE,
+  },
+  // Cloud Storage
+  cloudStorage: {
+    projectId: 'docs-bot-287308',
+    credentialsFilePath: path.resolve(__dirname, '..', 'credentials', 'admin.json'),
+    bucketName: 'docs-templates-bucket',
+  },
+
+  // Cloud Convert
   cloudConvertKey: CLOUD_CONVERT_KEY,
 };

@@ -10,6 +10,4 @@ export const createLoggerMiddleware = (api: Api): Middleware<ContextWithSession>
     })
 
     await next();
-
-    // Logging out result of a message (Request log / Response log)?
   };
