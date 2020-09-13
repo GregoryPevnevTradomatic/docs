@@ -17,6 +17,7 @@
     "config",
     "migrations",
     "dist",
+    "build",
     "knexfile.js"
   ]
 }
