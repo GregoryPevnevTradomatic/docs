@@ -47,7 +47,10 @@ const startProgress = (telegramClient: TelegramApiClient) => ({
   };
 
   if(messages.length > 1)
-    sendMessage(1);
+    intervalTimeout = setTimeout(
+      () => sendMessage(1),
+      interval,
+    );
 
   return {
     restart(newMessages: string[]) {
@@ -55,7 +58,10 @@ const startProgress = (telegramClient: TelegramApiClient) => ({
 
       messagesList = newMessages;
 
-      sendMessage(0);
+      intervalTimeout = setTimeout(
+        () => sendMessage(0),
+        interval,
+      );
     },
     stop() {
       clearTimeout(intervalTimeout);

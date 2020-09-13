@@ -44,7 +44,7 @@ export const createTemplateUploadHandler = (api: Api) =>
       const progressControl = await telegramClient.progress(
         ctx.message.chat.id,
         DownloadSteps,
-        2000,
+        3000,
       );
 
       await progressControl.start();

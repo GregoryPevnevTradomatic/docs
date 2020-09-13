@@ -15,7 +15,7 @@ import { Api } from '../../../api';
 import { DocumentParameters, parametersFrom } from '../../../models';
 import { TelegramClient } from '../../client';
 import { initialSessionFor } from '../../common/session';
-import { ProcessingSteps, clearKeyboard, DefaultMessageText, NextMessageText } from '../../common/messages';
+import { ProcessingSteps, clearKeyboard, NextMessageText } from '../../common/messages';
 
 // Ask: Is this ACTUALLY helpful???
 const extractParametersFromText = (text: string) =>
@@ -48,7 +48,7 @@ export const createParameterInputHandler = (api: Api) =>
       const progressControl = await telegramClient.progress(
         ctx.message.chat.id,
         ProcessingSteps,
-        5000, // Total of 20s (Average)
+        6000, // Total of 18s (Average)
       );
 
       await progressControl.start();

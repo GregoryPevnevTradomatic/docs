@@ -10,8 +10,8 @@ export const ParameterInputModesText = {
 export const BackCommand = 'Назад';
 
 export const DefaultErrorMessageText = 'Что-то пошло не так';
-export const PhotoUploadErrorText = 'Images and photoes are not supported';
-export const InvalidDocumentTypeText = 'Invalid file (Only DOCX files are supported)';
+export const PhotoUploadErrorText = 'Картинки и фотографии не поддержуются';
+export const InvalidDocumentTypeText = 'Тип файла не подерживается (Только DOCX)';
 export const ParameterInputErrorText = 'Неверное количество параметров, попробуйте еще раз';
 
 export const DefaultMessageText = 'Пришлите документ для обработки';
@@ -22,11 +22,10 @@ export const UnknownCommandText = 'Неизвестная операция, по
 
 export const DownloadSteps = [
   'Файл скачивается',
-  'Сканрование',
+  'Сканирование',
 ];
 export const ProcessingSteps = [
-  'Файл скачивается',
-  'Обработка',
+  'Обработка шаблона',
   'Создается PDF',
   'Файл отсылается',
 ];
