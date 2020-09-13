@@ -9,6 +9,8 @@ src
 files
 sql
 migrgations
-.env*
 nodemon.json
+tsconfig.js
+.eslint*
+.env*
 .DS_Store

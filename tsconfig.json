@@ -18,6 +18,7 @@
     "migrations",
     "dist",
     "build",
-    "knexfile.js"
+    "knexfile.js",
+    "ecosystem.config.js"
   ]
 }

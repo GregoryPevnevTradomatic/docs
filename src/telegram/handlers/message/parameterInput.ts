@@ -3,6 +3,7 @@ import {
   ContextWithSession,
   NextFunction,
   ParameterInputMode,
+  ParameterInputErrorText,
   BackCommand,
   popParameter,
   pushParameter,
@@ -14,6 +15,7 @@ import { Api } from '../../../api';
 import { DocumentParameters, parametersFrom } from '../../../models';
 import { TelegramClient } from '../../client';
 import { initialSessionFor } from '../../common/session';
+import { ProcessingSteps, clearKeyboard, DefaultMessageText, NextMessageText } from '../../common/messages';
 
 // Ask: Is this ACTUALLY helpful???
 const extractParametersFromText = (text: string) =>
@@ -31,7 +33,7 @@ export const createParameterInputHandler = (api: Api) =>
       const input = ctx.session.input;
 
       if(input.mode === ParameterInputMode.AllAtOnce)
-        return ctx.reply('Invalid number of parameters, try again');
+        return ctx.reply(ParameterInputErrorText);
 
       if(input.values.length === 0)
         return ctx.reply(currentOption(input));
@@ -45,9 +47,8 @@ export const createParameterInputHandler = (api: Api) =>
 
       const progressControl = await telegramClient.progress(
         ctx.message.chat.id,
-        ['Loading file', 'Processing file', 'Converting to PDF', 'Sending it to you'],
-        // TODO: Determine base on file-size
-        5000, // Total of 12s (Average)
+        ProcessingSteps,
+        5000, // Total of 20s (Average)
       );
 
       await progressControl.start();
@@ -63,7 +64,9 @@ export const createParameterInputHandler = (api: Api) =>
   
       ctx.session = initialSessionFor(ctx.session.user);
   
-      return telegramClient.uploadFile(ctx.message.chat.id, result);
+      await telegramClient.uploadFile(ctx.message.chat.id, result);
+
+      return ctx.reply(NextMessageText, clearKeyboard());
     };
 
     const inputHandler = async (ctx: ContextWithSession, next: NextFunction) => {

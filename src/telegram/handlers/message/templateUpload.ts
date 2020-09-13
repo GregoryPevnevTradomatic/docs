@@ -15,6 +15,7 @@ import { Api } from '../../../api';
 import { Document, DocumentFile, parameterNames } from '../../../models';
 import { FileData } from '../../../utilities';
 import { initialSessionFor } from '../../common/session';
+import { PhotoUploadErrorText, InvalidDocumentTypeText, ProcessingSteps, DownloadSteps, ParameterInputSelectionText, DefaultMessageText, NextMessageText } from '../../common/messages';
 
 const isValidFile = (file: TelegramFile): boolean => {
   if(file.mime_type && SUPPORTED_MIME_TYPES.includes(file.mime_type)) return true;
@@ -26,7 +27,7 @@ const isValidFile = (file: TelegramFile): boolean => {
 export const createTemplateUploadHandler = (api: Api) =>
   (telegramClient: TelegramClient): Middleware<ContextWithSession> => {
     const photoHandler = async (ctx: ContextWithSession, _: NextFunction) => {
-      return ctx.reply('Images and photoes are not supported');
+      return ctx.reply(PhotoUploadErrorText);
     };
 
     const fileHandler = async (ctx: ContextWithSession, _: NextFunction) => {
@@ -34,25 +35,21 @@ export const createTemplateUploadHandler = (api: Api) =>
       const currentDocument: Document = ctx.session.document;
 
       if(!isValidFile(file))
-        return ctx.reply('Invalid file (Only DOCX files are supported)');
+        return ctx.reply(InvalidDocumentTypeText);
 
       if(currentDocument) {
         await api.documents.abortDocument(currentDocument);
       }
 
-      const progressControlDownload = await telegramClient.progress(
+      const progressControl = await telegramClient.progress(
         ctx.message.chat.id,
-        ['Downloading...', 'Scanning the file...'],
-        1000,
+        DownloadSteps,
+        2000,
       );
 
-      await progressControlDownload.start();
+      await progressControl.start();
 
       const data: FileData = await telegramClient.downloadFile(file);
-
-      await progressControlDownload.finish();
-
-      console.log('Telegram-File:', data);
 
       const document: Document = await api.documents.initializeDocument({
         userId: ctx.session.user.userId,
@@ -60,36 +57,24 @@ export const createTemplateUploadHandler = (api: Api) =>
         templateData: data,
       });
 
-      console.log('Document:', document);
-
       const parameters: string[] = parameterNames(document.parameters);
-
-      console.log('Parameters:', parameters);
 
       // No parameters found
       if(parameters.length === 0) {
-        console.log('No Parameters');
-        
-        const progressControlProcess = await telegramClient.progress(
-          ctx.message.chat.id,
-          ['Loading file', 'Converting to PDF', 'Sending it to you'],
-          5000,
-        );
-
-        await progressControlProcess.start();
+        await progressControl.refresh(ProcessingSteps);
 
         const result: DocumentFile = await api.documents.processDocument(document, {});
 
-        console.log('Result:', result);
-
-        await progressControlProcess.finish();
+        await progressControl.finish();
   
         ctx.session = initialSessionFor(ctx.session.user);
-
-        console.log('Session:', ctx.session);
     
-        return telegramClient.uploadFile(ctx.message.chat.id, result);
+        await telegramClient.uploadFile(ctx.message.chat.id, result);
+
+        return ctx.reply(NextMessageText, clearKeyboard());
       }
+
+      await progressControl.finish();
 
       ctx.session.state = UserState.TEMPLATE_UPLOADED;
       ctx.session.document = document;
@@ -99,9 +84,7 @@ export const createTemplateUploadHandler = (api: Api) =>
         values: [],
       };
 
-      console.log('Session:', ctx.session);
-
-      return ctx.reply('Select Parameter-Entering Mode', inputChoicesButtons());
+      return ctx.reply(ParameterInputSelectionText, inputChoicesButtons());
     };
 
     const templateHandler = async (ctx: ContextWithSession, next: NextFunction) => {
@@ -111,7 +94,7 @@ export const createTemplateUploadHandler = (api: Api) =>
       if (ctx.message?.document)
         return fileHandler(ctx, next);
 
-      return ctx.reply('Send me a template', clearKeyboard());
+      return ctx.reply(DefaultMessageText, clearKeyboard());
     };
 
     return templateHandler;

@@ -1,5 +1,6 @@
 import { UserState, ContextWithSession } from '../common';
 import { Api } from '../../api';
+import { DefaultErrorMessageText } from '../common/messages';
 
 interface ErrorHandler {
   (err: Error, ctx: ContextWithSession): Promise<void>;
@@ -11,5 +12,5 @@ export const createErrorHandler = (api: Api): ErrorHandler =>
 
     ctx.session.state = UserState.INITIAL;
 
-    ctx.reply('Something went wrong');
+    ctx.reply(DefaultErrorMessageText);
   };

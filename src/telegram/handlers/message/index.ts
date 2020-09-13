@@ -5,6 +5,7 @@ import { Api } from '../../../api';
 import { createTemplateUploadHandler } from './templateUpload';
 import { createParameterChoiceHandler } from './parametersChoice';
 import { createParameterInputHandler } from './parameterInput';
+import { UnknownCommandText } from '../../common/messages';
 
 interface MessageHandlers {
   [state: number]: MiddlewareFn<ContextWithSession>;
@@ -30,6 +31,6 @@ export const createMessageHandler = (api: Api) =>
 
       if(handler) return handler(ctx, next);
 
-      return ctx.reply('Unknow option');
+      return ctx.reply(UnknownCommandText);
     };
   };

@@ -8,16 +8,15 @@ import {
   currentOption,
   ParameterInputModesText,
 } from '../../common';
+import { inputChoicesButtons, ParameterInputSelectionText } from '../../common/messages';
 import { Api } from '../../../api';
-import { inputChoicesButtons } from '../../common/messages';
 
-export const createParameterChoiceHandler = (api: Api): Middleware<ContextWithSession> =>
+export const createParameterChoiceHandler = (_: Api): Middleware<ContextWithSession> =>
   async (ctx: ContextWithSession, _: NextFunction) => {
     const currentMode: ParameterInputMode = ParameterInputModesText[ctx.message.text];
 
     ctx.session.input.mode = currentMode;
     ctx.session.state = UserState.ENTERING_PARAMETERS;
-    
 
     switch(currentMode) {
       case ParameterInputMode.AllAtOnce:
@@ -25,6 +24,6 @@ export const createParameterChoiceHandler = (api: Api): Middleware<ContextWithSe
       case ParameterInputMode.OneByOne:
         return ctx.reply(currentOption(ctx.session.input));
       default:
-        return ctx.reply('Select Parameter-Entering Mode', inputChoicesButtons());
+        return ctx.reply(ParameterInputSelectionText, inputChoicesButtons());
     }
   };

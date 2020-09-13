@@ -1,8 +1,10 @@
 import TelegramApiClient, { Message } from 'node-telegram-bot-api';
 import { clearKeyboard } from '../common';
+import { WaitingText } from '../common/messages';
 
 export interface ProgressControls {
   start(): Promise<void>;
+  refresh(messages: string[]): Promise<void>;
   finish(): Promise<void>;
 }
 
@@ -13,8 +15,9 @@ interface ProgressSettings {
   interval: number;
 }
 
-interface StopProgress {
-  (): void;
+interface MessagesControls {
+  restart(newMessages: string[]): void;
+  stop(): void;
 }
 
 const startProgress = (telegramClient: TelegramApiClient) => ({
@@ -22,19 +25,20 @@ const startProgress = (telegramClient: TelegramApiClient) => ({
   chatId,
   messageId,
   interval,
-}: ProgressSettings): StopProgress => {
+}: ProgressSettings): MessagesControls => {
+  let messagesList: string[] = messages.slice();
   let intervalTimeout: NodeJS.Timeout = null;
 
   const sendMessage = async (messageNumber: number) => {
     await telegramClient.editMessageText(
-      `${messages[messageNumber]}...`,
+      `${messagesList[messageNumber]}...`,
       {
         chat_id: chatId,
         message_id: messageId,
       },
     );
 
-    if (messageNumber < messages.length - 1) {
+    if (messageNumber < messagesList.length - 1) {
       intervalTimeout = setTimeout(
         () => sendMessage(messageNumber + 1),
         interval,
@@ -45,9 +49,18 @@ const startProgress = (telegramClient: TelegramApiClient) => ({
   if(messages.length > 1)
     sendMessage(1);
 
-  return () => {
-    clearTimeout(intervalTimeout)
-  };
+  return {
+    restart(newMessages: string[]) {
+      clearTimeout(intervalTimeout);
+
+      messagesList = newMessages;
+
+      sendMessage(0);
+    },
+    stop() {
+      clearTimeout(intervalTimeout);
+    }
+  }
 }
 
 export const Progress = (telegramClient: TelegramApiClient) =>
@@ -55,13 +68,13 @@ export const Progress = (telegramClient: TelegramApiClient) =>
     // MUST BE DIFFERENT FOR CLEARING
     let startMessage: Message;
     let progressMessage: Message;
-    let stopper: StopProgress;
+    let controls: MessagesControls;
 
     return {
       async start() {
         startMessage = await telegramClient.sendMessage(
           chatId,
-          'Please Wait...',
+          WaitingText,
           clearKeyboard(),
         );
 
@@ -70,15 +83,18 @@ export const Progress = (telegramClient: TelegramApiClient) =>
           messages[0],
         );
 
-        stopper = startProgress(telegramClient)({
+        controls = startProgress(telegramClient)({
           messages,
           chatId,
           interval,
           messageId: progressMessage.message_id,
         });
       },
+      async refresh(messages: string[]) {
+        controls.restart(messages);
+      },
       async finish() {
-        stopper();
+        controls.stop();
 
         await Promise.all([
           telegramClient.deleteMessage(chatId, String(startMessage.message_id)),

@@ -26,7 +26,7 @@ const prepareStream = (stream: NodeJS.ReadableStream): NodeJS.ReadableStream => 
   // SUPER-DIRTY BUT NECESSARY FOR TELEGRAM TO SEND A STREAM
   /* eslint-disable-next-line */
   // @ts-ignore
-  stream.path = 'file.pdf'; 
+  stream.path = 'файл.pdf'; 
 
   return stream;
 };
