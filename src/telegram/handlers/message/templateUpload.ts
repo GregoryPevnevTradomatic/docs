@@ -21,7 +21,7 @@ import {
 } from '../../common';
 import { Api } from '../../../api';
 import { Document, isParametersListEmpty } from '../../../models';
-import { FileData } from '../../../utilities';
+import { FileData, newFilename } from '../../../utilities';
 
 const isValidFile = (file: TelegramFile): boolean => {
   if(file.mime_type && SUPPORTED_MIME_TYPES.includes(file.mime_type)) return true;
@@ -54,7 +54,7 @@ export const createTemplateUploadHandler = (api: Api) =>
 
       const document: Document = await api.documents.initializeDocument({
         userId: ctx.session.user.userId,
-        templateFilename: file.file_name || `${Date.now()}.docx`, // TODO: Helper (Default name)
+        templateFilename: file.file_name || newFilename(),
         templateData: data,
       });
 

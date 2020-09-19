@@ -1,7 +1,5 @@
 import { Readable } from 'stream';
 
-// TODO: Integrate with File-Types / File-Data (Direct conversion)
-
 export const streamToBuffer = async (stream: NodeJS.ReadableStream): Promise<Buffer> => {
   const chunks = [];
 

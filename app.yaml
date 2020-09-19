@@ -1,6 +1,8 @@
 service: default
 runtime: nodejs10
 
+# TODO: Switch to Docker with Heroku
+
 # env_variables:
 #   POSTGRESQL: "postgresql://bots-user:1234@172.18.176.3:5432/docs"
 #   TELEGRAM_TOKEN: "1317427555:AAGgfYe3nThTLrBblrOBroe8Sl68gCVZjic"
@@ -10,7 +12,6 @@ runtime: nodejs10
 #   HEALTH_SERVER: 8080
 #   LOCAL_STORAGE: "/tmp"
 
-# TODO: PM2 (Restarting on failure)
 # Do NOT build
 entrypoint: npm run start
 

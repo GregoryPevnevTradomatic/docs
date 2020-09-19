@@ -1,24 +1,23 @@
 import { Bucket } from '@google-cloud/storage';
 import { pathForFileInBucket } from './common';
 import { SaveFile } from '../../services';
-import { FileDataType } from '../../utilities';
+import { FileDataType, transferStream } from '../../utilities';
 
-export const SaveFileToCloud = (bucket: Bucket): SaveFile => (file) =>
-  // TODO: Refactoring - Reusing logic (No duplicate code)
-  new Promise((res, rej) => {
-    if(file.fileData.type === FileDataType.Stream) {
-      file.fileData.stream.pipe(
+export const SaveFileToCloud = (bucket: Bucket): SaveFile => async (file) => {
+  switch(file.fileData.type) {
+    case FileDataType.Buffer:
+      await bucket.file(pathForFileInBucket(file))
+        .save(file.fileData.buffer);
+      break;
+    case FileDataType.Stream:
+      await transferStream(
+        file.fileData.stream,
         bucket.file(pathForFileInBucket(file))
           .createWriteStream({ resumable: false })
-      ).on('finish', () => {
-        // TODO: REMOVE WHENEVER YOU ARE READY (Streams-Only)
-        if(file.fileData.type === FileDataType.Stream) {
-          console.log('REFRESHING FILE:', pathForFileInBucket(file));
-
-          file.fileData.stream = bucket.file(pathForFileInBucket(file)).createReadStream();
-        }
-
-        res();
-      }).on('error',rej);
-    }
-  });
+      );
+      
+      // NOT REFRESHING -> USING BUFFERS FOR NOW BEFORE SWITCHING TO FULL-STREAM
+      // file.fileData.stream = bucket.file(pathForFileInBucket(file)).createReadStream();
+      break;
+  }
+};

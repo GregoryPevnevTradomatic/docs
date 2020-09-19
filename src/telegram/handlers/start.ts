@@ -1,15 +1,11 @@
 import { Middleware } from 'telegraf';
-import { UserState, ContextWithSession, NextFunction } from '../common';
+import { UserState, ContextWithSession, NextFunction, isSessionInProgress } from '../common';
 import { Api } from '../../api';
 import { DefaultMessage, ClearKeyboard, ParameterInputMessage, InputKeyboard, TemplateInfoMessage } from '../common/messages';
 
-// TODO: Session-Utility?
-const isInProgress = ({ session }: ContextWithSession): boolean =>
-  !!(session.state === UserState.PARAMETERS_INPUT && session.input && session.document);
-
 export const createStartHandler = (_: Api): Middleware<ContextWithSession> =>
   async (ctx: ContextWithSession, _: NextFunction) => {
-    if(isInProgress(ctx)) {
+    if(isSessionInProgress(ctx.session)) {
       await ctx.reply(TemplateInfoMessage(ctx.session.input));
 
       return ctx.reply(ParameterInputMessage(ctx.session.input), InputKeyboard(ctx.session.input));

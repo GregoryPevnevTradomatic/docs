@@ -7,13 +7,14 @@ import {
   parametersInputFromDocument,
 } from '../common';
 import { Api, UserData } from '../../api';
+import { DEFAULT_USERNAME } from '../../constants';
 
 const usernameFor = ({ first_name, last_name }: TelegramUser): string => {
   if(first_name && last_name) return `${first_name} ${last_name}`;
   if(first_name) return first_name;
   if(last_name) return last_name;
 
-  return 'Unknown'; // TODO: Constant
+  return DEFAULT_USERNAME;
 };
 
 const userDataFrom = (telegramUser: TelegramUser): UserData => ({
@@ -24,7 +25,7 @@ const userDataFrom = (telegramUser: TelegramUser): UserData => ({
 export const createAuthMiddleware = (api: Api): Middleware<ContextWithSession> =>
   async (ctx: ContextWithSession, next: NextFunction) => {
     if(!ctx.session.user) {
-      console.log('Loading User'); // TODO: Better logging
+      console.log('Loading User');
 
       const data: UserData = userDataFrom(ctx.message.from);
       const [user, document] = await Promise.all([
@@ -48,8 +49,6 @@ export const createAuthMiddleware = (api: Api): Middleware<ContextWithSession> =
         ctx.session.input = null;
       }
     }
-
-    console.log('Session:', ctx.session);
 
     next();
   };

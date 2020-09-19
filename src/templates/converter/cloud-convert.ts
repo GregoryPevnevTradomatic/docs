@@ -1,11 +1,11 @@
 import CloudConvert from 'cloudconvert';
 import https from 'https';
+import { downloadStreamFromURL } from '../../utilities';
 
 type DataStream = NodeJS.ReadableStream;
 
 const TASK_FILE_NAME = 'file.docx';
 
-// TODO: REFACTOR + OPTIMIZE THE SHIT OUT OF IT + DI
 export const ConvertDocxToPdf = (cloudConvert: CloudConvert) =>
   async (document: DataStream): Promise<DataStream> => {
     let job = await cloudConvert.jobs.create({
@@ -40,8 +40,5 @@ export const ConvertDocxToPdf = (cloudConvert: CloudConvert) =>
     )[0];
     const file = exportTask.result.files[0];
     
-    // TODO: Reusing the same thing from telegram -> "http" module in "utilities"
-    return new Promise((res) => {
-      https.get(file.url, response => res(response));
-    });
+    return downloadStreamFromURL(file.url);
   };

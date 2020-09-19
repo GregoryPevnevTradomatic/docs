@@ -1,12 +1,8 @@
-const FILENAME_PATTERN = /^([^\.]+)\.?.*$/;
+import { DEFAULT_RESULT_FILENAME, RESULT_EXTENSION } from '../../constants';
 
-// TODO: Application-Level Globals
-const DEFAULT_FILENAME = 'Result';
-
-const RESULT_EXTENSION = 'pdf';
+const FILENAME_PATTERN = /^([^.]+)\.?.*$/;
 
 const clearFilename = (filename: string): string =>
-  // TODO: Pre-processing filename for Telegram-Attachment
   filename.replace(/\s+/g, ' ') // No duplicate whitespace
     .replace(/\s/g, '_') // Get rid of whitespace
     .replace(/\//g, '_'); // Formatting filename
@@ -14,7 +10,7 @@ const clearFilename = (filename: string): string =>
 const withExtension = (filename: string, extension: string): string => {
   const match = filename.match(FILENAME_PATTERN);
 
-  const name = match.length > 1 ? match[1] : DEFAULT_FILENAME;
+  const name = match.length > 1 ? match[1] : DEFAULT_RESULT_FILENAME;
 
   return `${name}.${extension}`;
 };

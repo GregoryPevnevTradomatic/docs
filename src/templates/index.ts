@@ -1,21 +1,12 @@
-import https from 'https';
-import fs from 'fs';
-import util from 'util';
 import { DocumentFile, DocumentParameters, initializeParameters, resultFile } from '../models';
 import { Templates, ParseTemplate, ProcessTemplate } from '../services';
-import { bufferToStream, FileData, fileDataFromStream, FileDataType, streamToBuffer } from '../utilities';
+import { bufferToStream, loadBuffer, FileData, fileDataFromBuffer, FileDataType, streamToBuffer, downloadBufferFromURL } from '../utilities';
 import { DocumentTemplateConverter, createConverter } from './converter';
 import { DocumentTemplateProcessor, createTempateProcessor } from './processor';
 import { prepareFilename } from './utils';
 
-// TODO: Split into a separate file
-
-// TODO: Reusing via Common Utility
-const loadBuffer = util.promisify(fs.readFile);
-
 interface DocumentTemplatesSettings {
   cloudConvertKey: string;
-  // TODO: More settings
 }
 
 interface DocumentTemplatesServices {
@@ -31,13 +22,9 @@ const bufferFrom = async (file: FileData): Promise<Buffer> => {
       return streamToBuffer(file.stream);
     case FileDataType.Filepath:
       return loadBuffer(file.filepath);
-    // TODO: Remove URL type altogether
     case FileDataType.URL:
     default:
-      // TODO: Reusing the same thing from telegram -> "http" module in "utilities"
-      return new Promise((res) => {
-        https.get(file.url, response => res(streamToBuffer(response)));
-      });
+      return downloadBufferFromURL(file.url);
   }
 };
 
@@ -63,11 +50,12 @@ const ProcessDocumentTemplate = ({ processor, converter }: DocumentTemplatesServ
     ]);
 
     const resultConvertedFile = await bufferToStream(resultDocumentFile)
-      .then(converter.convertDocxToPdf);
+      .then(converter.convertDocxToPdf)
+      .then(streamToBuffer);
 
     return resultFile(
       prepareFilename(resultFilename),
-      fileDataFromStream(resultConvertedFile),
+      fileDataFromBuffer(resultConvertedFile),
     );
   };
 

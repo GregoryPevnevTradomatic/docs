@@ -39,11 +39,7 @@ const InitializeDocument = (services: Services) =>
     try {
       const file: DocumentFile = templateFile(templateFilename, templateData);
 
-      // TODO: This is bad - Make a built-in feature (Using Storage Service in the background???)
-      // Save before processing (Re-Opening the Stream)
       await services.storage.saveFile(file);
-
-      console.log('File Saved');
 
       const parameters: DocumentParameters = await services.templates.parseTemplate(file)
 
@@ -59,7 +55,6 @@ const InitializeDocument = (services: Services) =>
       
       return document;
     } catch (e) {
-      // TODO:  Send error in case of processing going wrong
       throw new Error(e);
     }
   };
@@ -75,6 +70,7 @@ const ProcessDocument = (services: Services) =>
   async (document: Document, parameters: DocumentParameters): Promise<DocumentFile> => {
     await services.storage.loadFile(document.template);
 
+    // Note: Updating document-record in multiple steps? (Parameters -> File -> Completion)
     document.parameters = parameters;
     document.status = DocumentStatus.Completed;
 
@@ -87,9 +83,10 @@ const ProcessDocument = (services: Services) =>
 
     await services.storage.saveFile(document.result);
 
-    // TODO: Split into steps (More Reliability and Consistency / Better Error-Handling and Logging)
     await Promise.all([
+      // Creating File-Record
       services.documentRepository.addFile(document, result),
+      // Updating Document-Record
       services.documentRepository.updateDocument(document),
     ]);
 

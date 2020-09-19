@@ -11,8 +11,6 @@ const extractParameters = (text: string): string[] => {
 
   if(!matches) return [];
 
-  // TODO: Checking ordering
-
   return matches.map(extractParameter);
 };
 

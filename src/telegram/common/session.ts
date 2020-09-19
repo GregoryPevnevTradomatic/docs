@@ -21,3 +21,6 @@ export const resetSession = (ctx: ContextWithSession): ContextWithSession => {
 
   return ctx;
 };
+
+export const isSessionInProgress = (session: ContextSession): boolean =>
+  !!(session.state === UserState.PARAMETERS_INPUT && session.input && session.document);

@@ -2,17 +2,12 @@ import { Extra } from 'telegraf';
 import { ExtraEditMessage } from 'telegraf/typings/telegram-types';
 import { isParametersInputEmpty, ParametersInput } from './models';
 
-// TODO: Splitting into modules / files -> "messages" (NOT "common")
-
 // Commands
 
 export const CancelCommand = 'Отмена';
 export const BackCommand = 'Назад';
 
 // Messages
-
-// TODO: Store in "hbs" files and use mustache
-//  -> Load on initialization
 
 const displayParameters = ({ parameters }: ParametersInput): string =>
   parameters.map(param => `"${param}"`).join('\n');

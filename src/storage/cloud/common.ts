@@ -3,8 +3,8 @@ import { DIRECTORIES, EXTENSIONS, DEFAULT_DIRECTORY, DEFAULT_EXTENSION } from '.
 import { DocumentFile } from '../../models';
 
 export const pathForFileInBucket = (file: DocumentFile): string =>
+  // Note: Could also have user's ID / Username included into the path
   path.join(
     DIRECTORIES[file.fileType] || DEFAULT_DIRECTORY,
-    // TODO: Using username "[bucket]/[user]/[file-id]"
     `${file.fileId}.${EXTENSIONS[file.fileType] || DEFAULT_EXTENSION}`,
   );

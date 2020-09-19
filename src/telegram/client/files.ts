@@ -1,8 +1,7 @@
 import TelegramApiClient from 'node-telegram-bot-api';
-import https from 'https';
 import { TelegramFile } from '../common';
 import { DocumentFile, DocumentFileType } from '../../models';
-import { FileData, fileDataFromStream } from '../../utilities';
+import { downloadBufferFromURL, FileData, fileDataFromBuffer, FileDataType } from '../../utilities';
 
 const DEFAULT_MIME_TYPE = 'application/octet-stream';
 
@@ -34,15 +33,35 @@ const prepareStream = (stream: NodeJS.ReadableStream): NodeJS.ReadableStream => 
 export const DownloadFileFromTelegram = (telegramClient: TelegramApiClient) =>
   async (file: TelegramFile): Promise<FileData> => {
     const url: string = await telegramClient.getFileLink(file.file_id);
+    const buffer: Buffer = await downloadBufferFromURL(url);
 
-    return new Promise(resolve => 
-      https.get(url, stream => resolve(fileDataFromStream(stream)))
-    );
+    return fileDataFromBuffer(buffer);
   };
 
 export const UploadFileToTelegram = (telegramClient: TelegramApiClient) =>
   async (chatId: number, file: DocumentFile): Promise<void> => {
-    console.log('Metadata:', metadataFor(file));
+    const metadata = metadataFor(file);
+
+    switch(file.fileData.type) {
+      case FileDataType.Buffer:
+        await telegramClient.sendDocument(chatId, file.fileData.buffer, {}, metadata);
+        break;
+      case FileDataType.Filepath:
+        await telegramClient.sendDocument(chatId, file.fileData.filepath, {}, metadata);
+        break;
+      case FileDataType.URL:
+        await telegramClient.sendDocument(chatId, file.fileData.url, {}, metadata);
+        break;
+      case FileDataType.Stream:
+      default:
+        await telegramClient.sendDocument(
+          chatId,
+          prepareStream(file.fileData.stream),
+          {},
+          metadataFor(file),
+        );
+        break;
+    }
 
     if(file.fileData.type === 'stream') {
       await telegramClient.sendDocument(

@@ -8,7 +8,6 @@ export const ShareURLFromCloud = (bucket: Bucket): LoadFile =>
     const [url] = await bucket.file(pathForFileInBucket(file)).getSignedUrl({
       version: 'v4',
       action: 'read',
-      // TODO: Find out whether telegram caches data -> Expire in 5min (Security)
       expires: Date.now() + 15 * 60 * 1000, // 5 minutes
     });
 

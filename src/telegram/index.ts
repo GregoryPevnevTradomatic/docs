@@ -8,9 +8,7 @@ import {
   createErrorHandler,
   createMessageHandler
 } from './handlers';
-
-// TODO: Separate
-const MESSAGE_ACTION = 'message';
+import { TELEGRAM_MESSAGE_ACTION } from './common';
 
 export interface TelegramBot {
   start: () => Promise<void>;
@@ -30,7 +28,7 @@ export const createTelegramBot = (botToken: string) => (api: Api): TelegramBot =
 
   telegramBot.catch(createErrorHandler(api));
 
-  telegramBot.on(MESSAGE_ACTION, createMessageHandler(api)(telegramClient) as Middleware<Context>);
+  telegramBot.on(TELEGRAM_MESSAGE_ACTION, createMessageHandler(api)(telegramClient) as Middleware<Context>);
 
   const start = async () => telegramBot.launch(); // Extra options???
 

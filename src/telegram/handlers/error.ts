@@ -8,7 +8,7 @@ interface ErrorHandler {
 
 export const createErrorHandler = (api: Api): ErrorHandler =>
   async (error: Error, ctx: ContextWithSession) => {
-    console.log('Error:', error); // TODO: Better error messaging
+    console.log('Error:', error);
 
     ctx.session.state = UserState.TEMPLATE_UPLOAD;
 
