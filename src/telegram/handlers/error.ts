@@ -1,6 +1,6 @@
 import { UserState, ContextWithSession } from '../common';
 import { Api } from '../../api';
-import { DefaultErrorMessageText } from '../common/messages';
+import { ErrorMessage } from '../common/messages';
 
 interface ErrorHandler {
   (err: Error, ctx: ContextWithSession): Promise<void>;
@@ -8,9 +8,9 @@ interface ErrorHandler {
 
 export const createErrorHandler = (api: Api): ErrorHandler =>
   async (error: Error, ctx: ContextWithSession) => {
-    console.log('Error:', error);
+    console.log('Error:', error); // TODO: Better error messaging
 
-    ctx.session.state = UserState.INITIAL;
+    ctx.session.state = UserState.TEMPLATE_UPLOAD;
 
-    ctx.reply(DefaultErrorMessageText);
+    ctx.reply(ErrorMessage());
   };

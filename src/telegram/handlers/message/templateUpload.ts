@@ -6,16 +6,22 @@ import {
   TelegramFile,
   ContextWithSession,
   NextFunction,
-  inputChoicesButtons,
-  clearKeyboard,
+  DefaultMessage,
+  ClearKeyboard,
+  DownloadSteps,
+  resetSession,
   SUPPORTED_MIME_TYPES,
-  SUPPORTED_EXTENSIONS
+  SUPPORTED_EXTENSIONS,
+  NoParametersMessage,
+  InputKeyboard,
+  ParameterInputMessage,
+  parametersInputFromDocument,
+  TemplateInfoMessage,
+  ParameterInputInProcessMessage
 } from '../../common';
 import { Api } from '../../../api';
-import { Document, DocumentFile, parameterNames } from '../../../models';
+import { Document, isParametersListEmpty } from '../../../models';
 import { FileData } from '../../../utilities';
-import { initialSessionFor } from '../../common/session';
-import { PhotoUploadErrorText, InvalidDocumentTypeText, ProcessingSteps, DownloadSteps, ParameterInputSelectionText, DefaultMessageText, NextMessageText } from '../../common/messages';
 
 const isValidFile = (file: TelegramFile): boolean => {
   if(file.mime_type && SUPPORTED_MIME_TYPES.includes(file.mime_type)) return true;
@@ -27,19 +33,14 @@ const isValidFile = (file: TelegramFile): boolean => {
 export const createTemplateUploadHandler = (api: Api) =>
   (telegramClient: TelegramClient): Middleware<ContextWithSession> => {
     const photoHandler = async (ctx: ContextWithSession, _: NextFunction) => {
-      return ctx.reply(PhotoUploadErrorText);
+      return ctx.reply(DefaultMessage());
     };
 
     const fileHandler = async (ctx: ContextWithSession, _: NextFunction) => {
       const file: TelegramFile = ctx.message?.document;
-      const currentDocument: Document = ctx.session.document;
 
       if(!isValidFile(file))
-        return ctx.reply(InvalidDocumentTypeText);
-
-      if(currentDocument) {
-        await api.documents.abortDocument(currentDocument);
-      }
+        return ctx.reply(DefaultMessage());
 
       const progressControl = await telegramClient.progress(
         ctx.message.chat.id,
@@ -53,48 +54,42 @@ export const createTemplateUploadHandler = (api: Api) =>
 
       const document: Document = await api.documents.initializeDocument({
         userId: ctx.session.user.userId,
-        templateFilename: file.file_name || `${Date.now()}.docx`,
+        templateFilename: file.file_name || `${Date.now()}.docx`, // TODO: Helper (Default name)
         templateData: data,
       });
 
-      const parameters: string[] = parameterNames(document.parameters);
-
-      // No parameters found
-      if(parameters.length === 0) {
-        await progressControl.refresh(ProcessingSteps);
-
-        const result: DocumentFile = await api.documents.processDocument(document, {});
-
-        await progressControl.finish();
-  
-        ctx.session = initialSessionFor(ctx.session.user);
-    
-        await telegramClient.uploadFile(ctx.message.chat.id, result);
-
-        return ctx.reply(NextMessageText, clearKeyboard());
-      }
-
       await progressControl.finish();
 
-      ctx.session.state = UserState.TEMPLATE_UPLOADED;
-      ctx.session.document = document;
-      ctx.session.input = {
-        mode: null,
-        parameters,
-        values: [],
-      };
+      // No parameters found
+      if(isParametersListEmpty(document.parameters)) {
+        await api.documents.abortDocument(document);
 
-      return ctx.reply(ParameterInputSelectionText, inputChoicesButtons());
+        return resetSession(ctx).reply(NoParametersMessage(), ClearKeyboard());
+      }
+
+      ctx.session.state = UserState.PARAMETERS_INPUT;
+      ctx.session.document = document;
+      ctx.session.input = parametersInputFromDocument(document);
+
+      await ctx.reply(TemplateInfoMessage(ctx.session.input));
+
+      return ctx.reply(
+        ParameterInputMessage(ctx.session.input),
+        InputKeyboard(ctx.session.input),
+      );
     };
 
     const templateHandler = async (ctx: ContextWithSession, next: NextFunction) => {
+      if(ctx.session.document)
+        return ctx.reply(ParameterInputInProcessMessage());
+
       if (ctx.message?.photo)
         return photoHandler(ctx, next);
 
       if (ctx.message?.document)
         return fileHandler(ctx, next);
 
-      return ctx.reply(DefaultMessageText, clearKeyboard());
+      return ctx.reply(DefaultMessage(), ClearKeyboard());
     };
 
     return templateHandler;

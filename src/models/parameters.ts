@@ -1,18 +1,45 @@
-export interface DocumentParameters {
+interface FormattedParameters {
   [name:string]: string;
 }
 
-export const emptyParameters = (names: string[]): DocumentParameters =>
-  names.reduce((result: DocumentParameters, name: string) => ({
-    ...result,
-    [name]: null,
-  }), {});
+export interface DocumentParameters {
+  names: string[];
+  values: string[];
+}
 
-export const parametersFrom = (names: string[], values: string[]): DocumentParameters =>
-  names.reduce((result: DocumentParameters, name: string, index: number) => ({
-    ...result,
+// TODO: Refactoring duplication with "ParametersInput"
+//  - Storing together with "Parameters Input"???
+
+// TODO: Deduplication + Combination
+const uniqueParameterNames = (names: string[]): string[] => {
+  const table: { [name:string]: boolean } = {};
+
+  return names.filter((paramName) => {
+    if(table[paramName]) return false;
+
+    table[paramName] = true;
+
+    return true;
+  });
+};
+
+export const initializeParameters = (parameters: string[]): DocumentParameters => ({
+  names: uniqueParameterNames(parameters),
+  values: [],
+})
+
+export const parametersFrom = (names: string[], values: string[]): DocumentParameters => ({
+  names,
+  values,
+});
+
+export const formatParameters = ({ names, values }: DocumentParameters): FormattedParameters =>
+  names.reduce((params, name, index) => ({
+    ...params,
     [name]: values[index],
   }), {});
 
-export const parameterNames = (parameters: DocumentParameters): string[] =>
-  Object.keys(parameters).sort().slice();
+export const parametersToList = ({ names }: DocumentParameters): string[] => names;
+
+export const isParametersListEmpty = ({ names }: DocumentParameters): boolean =>
+  names.length === 0;

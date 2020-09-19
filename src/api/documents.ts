@@ -3,13 +3,10 @@ import {
   DocumentFile,
   DocumentParameters,
   DocumentStatus,
-  resultFile,
   templateFile,
-  emptyParameters,
 } from '../models';
 import { Services } from '../services';
-import { FileData, FileDataType } from '../utilities';
-import {  } from '../models';
+import { FileData } from '../utilities';
 
 export interface DocumentData {
   userId: string;

@@ -2,7 +2,7 @@ import TelegramApiClient from 'node-telegram-bot-api';
 import https from 'https';
 import { TelegramFile } from '../common';
 import { DocumentFile, DocumentFileType } from '../../models';
-import { extractData, FileData, fileDataFromStream, streamToBuffer } from '../../utilities';
+import { FileData, fileDataFromStream } from '../../utilities';
 
 const DEFAULT_MIME_TYPE = 'application/octet-stream';
 

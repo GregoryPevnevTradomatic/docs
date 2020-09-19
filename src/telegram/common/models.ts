@@ -1,15 +1,17 @@
 // Parameters
 
-export enum ParameterInputMode {
-  OneByOne = 'One',
-  AllAtOnce = 'All',
-}
+import { Document } from '../../models';
 
 export interface ParametersInput {
-  mode: ParameterInputMode;
   parameters: string[];
   values: string[];
 }
+
+export const parametersInputFromDocument = (document: Document): ParametersInput =>
+  ({
+    parameters: document.parameters.names,
+    values: document.parameters.values,
+  });
 
 export const pushParameter = (params: string[], param: string): string[] =>
   [...params, param];
@@ -17,7 +19,10 @@ export const pushParameter = (params: string[], param: string): string[] =>
 export const popParameter = (params: string[]): string[] =>
   params.length === 0 ? []: params.slice(0, params.length - 1);
 
-export const isParametersInputComplete = (input: ParametersInput) =>
+export const isParametersInputEmpty = (input: ParametersInput): boolean =>
+  input.values.length === 0;
+
+export const isParametersInputComplete = (input: ParametersInput): boolean =>
   input.parameters.length === input.values.length;
 
 // Telegram

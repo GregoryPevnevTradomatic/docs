@@ -19,24 +19,23 @@ export interface SqlDocumentData extends SqlParameters {
   result_created_at: string;
 }
 
-export const parametersToSql = (params: DocumentParameters): SqlParameters => {
-  const parameters: string[] = Object.keys(params);
-  const values: string[] = parameters.map((param: string) => params[param]);
-
-  return { parameters, values };
-};
+export const parametersToSql = ({ names, values }: DocumentParameters): SqlParameters =>
+  ({
+    parameters: names,
+    values,
+  });
 
 export const parametersFromSql = ({ parameters, values }: SqlParameters): DocumentParameters =>
-  parameters.reduce((params: DocumentParameters, param: string, index: number) => ({
-    ...params,
-    [param]: values[index],
-  }), {});
+  ({
+    names: parameters,
+    values,
+  });
 
 export const documentFromData = (data: SqlDocumentData): Document =>
   ({
     docId: data.doc_id,
     userId: data.user_id,
-    status: DocumentStatus[data.status],
+    status: data.status as DocumentStatus,
     parameters: parametersFromSql(data),
     template: data.template_id !== null ? {
       fileId: data.template_id,

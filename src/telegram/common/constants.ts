@@ -1,7 +1,10 @@
+import { DOCX_MIME_TYPE } from '../../constants';
+
 export const SUPPORTED_MIME_TYPES = [
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  DOCX_MIME_TYPE,
 ];
 
 export const SUPPORTED_EXTENSIONS = [
+  '.doc',
   '.docx'
 ];

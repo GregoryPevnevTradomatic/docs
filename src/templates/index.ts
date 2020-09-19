@@ -1,7 +1,7 @@
 import https from 'https';
 import fs from 'fs';
 import util from 'util';
-import { DocumentFile, DocumentParameters, emptyParameters, resultFile } from '../models';
+import { DocumentFile, DocumentParameters, initializeParameters, resultFile } from '../models';
 import { Templates, ParseTemplate, ProcessTemplate } from '../services';
 import { bufferToStream, FileData, fileDataFromStream, FileDataType, streamToBuffer } from '../utilities';
 import { DocumentTemplateConverter, createConverter } from './converter';
@@ -31,6 +31,7 @@ const bufferFrom = async (file: FileData): Promise<Buffer> => {
       return streamToBuffer(file.stream);
     case FileDataType.Filepath:
       return loadBuffer(file.filepath);
+    // TODO: Remove URL type altogether
     case FileDataType.URL:
     default:
       // TODO: Reusing the same thing from telegram -> "http" module in "utilities"
@@ -47,10 +48,11 @@ const ParseDocumentTemplate = ({ processor }: DocumentTemplatesServices): ParseT
       bufferFrom(file.fileData).then(processor.parseFile),
     ]);
 
-    return {
-      ...emptyParameters(filenameParams),
-      ...emptyParameters(fileParams),
-    };
+    // Ordering: Filename parameters go first
+    return initializeParameters([
+      ...filenameParams,
+      ...fileParams,
+    ]);
   };
 
 const ProcessDocumentTemplate = ({ processor, converter }: DocumentTemplatesServices): ProcessTemplate =>
@@ -60,7 +62,6 @@ const ProcessDocumentTemplate = ({ processor, converter }: DocumentTemplatesServ
       processor.renderText(file.fileName, parameters),
     ]);
 
-    // TODO: URL (When utilizing Bucket-Upload)
     const resultConvertedFile = await bufferToStream(resultDocumentFile)
       .then(converter.convertDocxToPdf);
 
