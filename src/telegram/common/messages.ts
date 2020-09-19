@@ -13,13 +13,13 @@ const displayParameters = ({ parameters }: ParametersInput): string =>
   parameters.map(param => `"${param}"`).join('\n');
 
 const displayParametersWithValues = ({ parameters, values }: ParametersInput): string =>
-  values.map((value, index) => `"${parameters[index]}": ${value}`).join('\n');
+  values.slice(0, parameters.length).map((value, index) => `"${parameters[index]}": ${value}`).join('\n');
 
 export const ErrorMessage = (): string =>
 'Что-то пошло не так';
 
 export const DefaultMessage = (): string =>
-`Чтобы начать обработку, пришлите шаблон документа в формате Microsoft Word.
+`Пришлите шаблон документа в формате Microsoft Word.\n
 Все поля, которые Вы желаете заполнить, заранее замените на {название поля 1}, {название поля 2} и т.д.`;
 
 export const WaitingMessage = (): string =>
@@ -29,7 +29,7 @@ export const UnknownCommandMessage = (): string =>
 'Неизвестная операция, попробуйте еще';
 
 export const TemplateInfoMessage = (input: ParametersInput): string =>
-`Шаблон успешно обработан!
+`Шаблон успешно обработан!\n
 Мы обнаружили следующие поля для заполнения:
 ${displayParameters(input)}`;
 

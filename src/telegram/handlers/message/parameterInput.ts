@@ -64,6 +64,11 @@ export const createParameterInputHandler = (api: Api) =>
       const text = ctx.message.text;
       const { input, document } = ctx.session;
 
+      // All parameters are entered -> Waiting for the processing to complete
+      // Next Version: Separate state
+      if(isParametersInputComplete(input))
+        return;
+
       if (text === CancelCommand) {
         await api.documents.abortDocument(document);
 

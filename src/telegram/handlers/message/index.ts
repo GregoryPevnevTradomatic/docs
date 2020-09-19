@@ -1,10 +1,9 @@
 import { MiddlewareFn } from 'telegraf/typings/composer';
 import { TelegramClient } from '../../client';
-import { UserState, ContextWithSession, NextFunction } from '../../common';
+import { UserState, ContextWithSession, NextFunction, ErrorMessage, UnknownCommandMessage, resetSession } from '../../common';
 import { Api } from '../../../api';
 import { createTemplateUploadHandler } from './templateUpload';
 import { createParameterInputHandler } from './parameterInput';
-import { UnknownCommandMessage } from '../../common/messages';
 
 interface MessageHandlers {
   [state: number]: MiddlewareFn<ContextWithSession>;
@@ -20,14 +19,21 @@ export const createMessageHandler = (api: Api) =>
       [UserState.PARAMETERS_INPUT]: inputHandler,
     };
 
-    return (ctx: ContextWithSession, next: NextFunction) => {
-      if(ctx.message.photo || ctx.message.document)
-        return uploadHandler(ctx, next);
+    return async (ctx: ContextWithSession, next: NextFunction) => {
+      try {
+        if(ctx.message.photo || ctx.message.document) {
+          await uploadHandler(ctx, next);
+          return;
+        }
 
-      const handler = handlers[ctx.session.state];
+        const handler = handlers[ctx.session.state];
 
-      if(handler) return handler(ctx, next);
-
-      return ctx.reply(UnknownCommandMessage());
+        if(handler) await handler(ctx, next);
+        else await ctx.reply(UnknownCommandMessage());
+      } catch (error) {
+        console.log('Error:', error);
+    
+        resetSession(ctx).reply(ErrorMessage());
+      }
     };
   };

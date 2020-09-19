@@ -30,7 +30,7 @@ exports.up = function(knex) {
       LEFT JOIN ${FILES_TABLE} AS results
         ON ${DOCS_TABLE}.doc_id = results.doc_id AND results.file_type = '${RESULT_FILE_TYPE}';
     `
-  )
+  );
 };
 
 exports.down = function(knex) {

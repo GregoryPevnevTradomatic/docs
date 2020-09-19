@@ -23,7 +23,7 @@ export const isParametersInputEmpty = (input: ParametersInput): boolean =>
   input.values.length === 0;
 
 export const isParametersInputComplete = (input: ParametersInput): boolean =>
-  input.parameters.length === input.values.length;
+  input.values.length >= input.parameters.length;
 
 // Telegram
 
